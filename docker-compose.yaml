@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  scraper-cookie:
+    container_name: SCRAPERCOOKIE_DEV
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    ports:
+      - 3031:3031
+    volumes:
+      - .:/workspaces/scraperCookie
+    # env_file:
+    #   - .devcontainer/dev.env
+    working_dir: /workspaces/scraperCookie
+    tty: true
+    entrypoint: ["bash"]
