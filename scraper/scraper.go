@@ -1,75 +1,37 @@
 package scraper
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/gocolly/colly"
 	"github.com/trietmnj/scraperCookie/rest"
 )
 
-type Downloader struct {
-	Collector colly.Collector
+type Scraper struct {
+	Collector    *colly.Collector
+	FlagUseProxy bool // TODO future extension
 }
 
-type RequestConfig struct {
-	Endpoint  string
-	Type      rest.RequestType // eg GET, POST, etc.
-	URLParams map[string]string
+// Add another domain to collector
+func (s Scraper) AddDomain(n string) {
+	s.Collector.AllowedDomains = append(s.Collector.AllowedDomains, n)
 }
 
-func (p RequestConfig) AddEndPoint(s string) {
-	p.Endpoint = s
-}
-
-// Send HTTP request and automatically parse any json response
-func (d Downloader) SendRequest(
-	rc RequestConfig,
+// Start scraping
+func (s Scraper) Scrape(
+	rc rest.RequestConfig,
 	handleResponse func(r *colly.Response),
-) (colly.Response, error) {
+) {
 
-	c := colly.NewCollector(
-		colly.AllowedDomains(d.ApiHost),
-	)
-
-	c.OnRequest(func(r *colly.Request) {
+	s.Collector.OnRequest(func(r *colly.Request) {
 		r.Ctx.Put("url", r.URL.String())
 	})
 
-	c.OnResponse(func(r *colly.Response) {
-		// if r.StatusCode < 200 || r.StatusCode > 299 {
-		// 	return nil, errors.New()
-		// }
-
-		// fmt.Println("Read from: " + r.Ctx.Get("url"))
-		// return r, nil
+	s.Collector.OnResponse(func(r *colly.Response) {
 		handleResponse(r)
 	})
 
-	c.OnError(func(_ *colly.Response, err error) {
+	s.Collector.OnError(func(_ *colly.Response, err error) {
 		fmt.Println("Something went wrong:", err)
 	})
-
-	// switch requestType := p.Type; requestType {
-	// case "GET":
-	// 	url := d.ApiHost + p.Endpoint
-	// 	fmt.Println("GET request: " + url)
-
-	// 	response, err := http.Get(url)
-	// 	defer response.Body.Close()
-	// 	return response, err
-	// default:
-	// 	fmt.Println("Wrong request type")
-	// }
-
-	// if response.StatusCode == 200 {
-	// 	bodyText, err := ioutil.ReadAll(response.Body)
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 	}
-	// 	return bodyText, nil
-	// } else {
-	// 	return nil, errors.New("Request failed")
-	// }
-	return nil, errors.New("Failed to SendRequest")
 }

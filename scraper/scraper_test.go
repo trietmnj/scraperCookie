@@ -1,25 +1,31 @@
-package downloader
+package scraper
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/gocolly/colly"
 	"github.com/stretchr/testify/assert"
+	"github.com/trietmnj/scraperCookie/rest"
 )
 
-func TestSendRequest(t *testing.T) {
-	c := RequestConfig{
+func TestScrape(t *testing.T) {
+
+	c := rest.RequestConfig{
 		Endpoint:  "/get",
-		Type:      GET,
-		URLParams: map[string]string{},
+		Type:      rest.GET,
+		URLParams: map[string]string{}, // empty map
 	}
 
-	d := Downloader{
-		ApiHost: "https://httpbin.org",
+	s := Scraper{
+		Collector:    colly.NewCollector(),
+		FlagUseProxy: false,
 	}
 
-	_, err := d.SendRequest(c)
+	s.AddDomain("https://httpbin.org")
 
-	if assert.NoError(t, err) {
-		assert.Equal(t, err, false)
-	}
+	s.Scrape(c, func(r *colly.Response) {
+		fmt.Println(r.StatusCode)
+		assert.Equal(t, r.StatusCode, 200)
+	})
 }

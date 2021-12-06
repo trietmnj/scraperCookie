@@ -17,3 +17,9 @@ type WebPage struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
+
+type RequestConfig struct {
+	Endpoint  string
+	Type      RequestType // eg GET, POST, etc.
+	URLParams map[string]string
+}
