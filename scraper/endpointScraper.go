@@ -41,7 +41,7 @@ func (s EndpointScraper) Scrape() error {
 		case "html":
 			c.OnHTML(h.optParam, h.handler.(func(e *colly.HTMLElement)))
 		case "xml":
-			c.OnXML(h.optParam, h.handler.(func(e *colly.HTMLElement)))
+			c.OnXML(h.optParam, h.handler.(func(e *colly.XMLElement)))
 		case "scraped":
 			c.OnResponse(h.handler.(func(r *colly.Response)))
 		default:
