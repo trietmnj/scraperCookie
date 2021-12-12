@@ -5,27 +5,23 @@ import (
 	"testing"
 
 	"github.com/gocolly/colly"
-	"github.com/stretchr/testify/assert"
-	"github.com/trietmnj/scraperCookie/rest"
 )
 
-func TestScrape(t *testing.T) {
+func Test_Scrape(t *testing.T) {
 
-	c := rest.RequestConfig{
-		Endpoint:  "/get",
-		Type:      rest.GET,
-		URLParams: map[string]string{}, // empty map
-	}
+	s := EndpointScraper{}
 
-	s := Scraper{
-		Collector:    colly.NewCollector(),
-		FlagUseProxy: false,
-	}
-
-	s.AddDomain("https://httpbin.org")
-
-	s.Scrape(c, func(r *colly.Response) {
-		fmt.Println(r.StatusCode)
-		assert.Equal(t, r.StatusCode, 200)
-	})
+	s.AddConfig(
+		[]func(*colly.Collector){colly.Async(true)},
+	)
+	s.AddURLs(
+		[]string{"https://httpbin.org/get"},
+	)
+	s.AddHandler(CallbackHandler{
+		"reponse", "",
+		func(r *colly.Response) {
+			fmt.Println("Visited", r.Request.URL)
+		}})
+	s.AddStoreAccessor()
+	s.Scrape()
 }

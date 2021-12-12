@@ -1,37 +1,45 @@
 package scraper
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/gocolly/colly"
-	"github.com/trietmnj/scraperCookie/rest"
 )
 
-type Scraper struct {
-	Collector    *colly.Collector
-	FlagUseProxy bool // TODO future extension
+// Common methods accessible via the BaseScraper
+
+func (s *BaseScraper) AddStoreAccessor() {
+
 }
 
-// Add another domain to collector
-func (s Scraper) AddDomain(n string) {
-	s.Collector.AllowedDomains = append(s.Collector.AllowedDomains, n)
-}
+func (s *BaseScraper) AddHandler(h CallbackHandler) error {
 
-// Start scraping
-func (s Scraper) Scrape(
-	rc rest.RequestConfig,
-	handleResponse func(r *colly.Response),
-) {
+	// validate that handler can fit into colly callback API
+	var w interface{}
+	var ok bool
+	switch h.order {
+	case "request":
+		w, ok = h.handler.(func(r *colly.Request))
+	case "error":
+		w, ok = h.handler.(func(_ *colly.Response, err error))
+	// case "reponse-headers": // TODO update colly to a version with c.OnResponseHeaders()
+	// 	w, ok = h.handler.(func(r *colly.Response))
+	case "reponse":
+		w, ok = h.handler.(func(r *colly.Response))
+	case "html":
+		w, ok = h.handler.(func(e *colly.HTMLElement))
+	case "xml":
+		w, ok = h.handler.(func(e *colly.XMLElement))
+	case "scraped":
+		w, ok = h.handler.(func(r *colly.Response))
+	default:
+		ok = false
+	}
 
-	s.Collector.OnRequest(func(r *colly.Request) {
-		r.Ctx.Put("url", r.URL.String())
-	})
-
-	s.Collector.OnResponse(func(r *colly.Response) {
-		handleResponse(r)
-	})
-
-	s.Collector.OnError(func(_ *colly.Response, err error) {
-		fmt.Println("Something went wrong:", err)
-	})
+	if !ok {
+		return errors.New("Unable to assert handler into colly API defined callbacks")
+	} else {
+		s.handlers = append(s.handlers, CallbackHandler{h.order, h.optParam, w})
+		return nil
+	}
 }
