@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: dev.Dockerfile
     ports:
-      - 3031:3031
+      - 3032:3032
     volumes:
       - .:/workspaces/scraperCookie
     # env_file:

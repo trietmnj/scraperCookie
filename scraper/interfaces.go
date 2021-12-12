@@ -14,28 +14,24 @@ type IScraper interface {
 }
 
 type BaseScraper struct {
-	list         rest.URLList
 	FlagUseProxy bool // TODO future extension
 	Store        store.StoreAccessor
-	config       CollectorConfig
 	handlers     []CallbackHandler
 }
 
 type CollectorConfig []func(*colly.Collector)
 
-//
 type CallbackHandler struct {
-	order    string      // request, error, responseheader, response, html, xml, scraped
-	optParam string      // optional param
-	handler  interface{} // handler function http://go-colly.org/docs/introduction/start/
+	order string // request, error, responseheader, response, html, xml, scraped
+	// optional param used with html or xml order
+	// http://go-colly.org/docs/introduction/start/
+	optParam string
+	handler  interface{} // handler function used with any of the OnXXX methods
 }
 
-// Usage:
-// s := EndpointScraper{}
-// s.AddConfig([colly.Async(true)])
-// s.AddURLs([]string{"https://httpbin.org/get"})
-// s.AddStoreAccessor()
-// s.Scrape()
+// implementation of of the base scraper
 type EndpointScraper struct {
 	BaseScraper
+	list   rest.URLList
+	config CollectorConfig
 }

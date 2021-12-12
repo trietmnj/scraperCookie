@@ -37,19 +37,27 @@ func (s EndpointScraper) Scrape() error {
 		case "error":
 			c.OnError(h.handler.(func(_ *colly.Response, err error)))
 		case "reponse":
+			// testFunc, ok := h.handler.(func(r *colly.Response))
+			// // fmt.Println(testFunc)
+			// fmt.Println(ok)
+			// c.OnResponse(testFunc)
 			c.OnResponse(h.handler.(func(r *colly.Response)))
+			// c.OnResponse(h.handler)
 		case "html":
 			c.OnHTML(h.optParam, h.handler.(func(e *colly.HTMLElement)))
 		case "xml":
 			c.OnXML(h.optParam, h.handler.(func(e *colly.XMLElement)))
 		case "scraped":
-			c.OnResponse(h.handler.(func(r *colly.Response)))
+			c.OnScraped(h.handler.(func(r *colly.Response)))
 		default:
-			errors.New("colly callback API not available for order: " + h.order)
+			return errors.New("colly callback API not available for order: " + h.order)
 		}
 	}
 
-	q.Run(c)
+	err = q.Run(c)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -63,7 +71,6 @@ func (s *EndpointScraper) AddConfig(c CollectorConfig) {
 
 	requiredConfigs := []func(*colly.Collector){
 		colly.MaxDepth(1),
-		colly.Async(true),
 	}
 
 	s.config = append(c, requiredConfigs...)
