@@ -7,11 +7,13 @@ import (
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/debug"
+	"github.com/trietmnj/scraperCookie/store"
 )
 
-func Test_Scrape(t *testing.T) {
+var s = EndpointScraper{}
+var st = store.S3Store{}
 
-	s := EndpointScraper{}
+func Test_Scrape(t *testing.T) {
 
 	s.AddConfig(
 		[]func(*colly.Collector){
@@ -25,6 +27,8 @@ func Test_Scrape(t *testing.T) {
 			// colly.Async(true),
 		},
 	)
+	st.Init()
+	s.AddStoreAccessor(st)
 	s.AddURLs(
 		[]string{
 			"https://httpbin.org/get",
@@ -54,6 +58,9 @@ func Test_Scrape(t *testing.T) {
 			log.Println("Something went wrong:", err)
 		},
 	})
-	// s.AddStoreAccessor()
 	s.Scrape()
+}
+
+func Test_Save2S3() {
+
 }

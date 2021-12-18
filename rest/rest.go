@@ -4,14 +4,6 @@ import "github.com/trietmnj/scraperCookie/utils"
 
 type RequestType utils.Bits
 
-const (
-	GET RequestType = 1 << iota
-	POST
-	DELETE
-	PUT
-	UPDATE
-)
-
 type WebPage struct {
 	Url     string `json:"url"`
 	Title   string `json:"title"`
@@ -20,6 +12,9 @@ type WebPage struct {
 
 type RequestConfig struct {
 	Endpoint  string
-	Type      RequestType // eg GET, POST, etc.
+	Type      string // eg GET, POST, etc.
 	URLParams map[string]string
 }
+
+// List of URLs to query
+type URLList []string

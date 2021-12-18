@@ -9,13 +9,13 @@ import (
 type IScraper interface {
 	Scrape() error // start scraping
 	AddConfig(c CollectorConfig)
-	AddStoreAccessor() // data storage accessor
+	AddStoreAccessor(s store.IStore) // data storage accessor
 	AddHandler(h CallbackHandler) error
 }
 
 type BaseScraper struct {
 	FlagUseProxy bool // TODO future extension
-	Store        store.StoreAccessor
+	Store        store.IStore
 	handlers     []CallbackHandler
 }
 

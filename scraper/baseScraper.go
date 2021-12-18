@@ -4,12 +4,11 @@ import (
 	"errors"
 
 	"github.com/gocolly/colly"
+	"github.com/trietmnj/scraperCookie/store"
 )
 
-// Common methods accessible via the BaseScraper
-
-func (s *BaseScraper) AddStoreAccessor() {
-
+func (s *BaseScraper) AddStoreAccessor(st store.IStore) {
+	s.Store = st
 }
 
 func (s *BaseScraper) AddHandler(h CallbackHandler) error {

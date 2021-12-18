@@ -37,10 +37,6 @@ func (s EndpointScraper) Scrape() error {
 		case "error":
 			c.OnError(h.handler.(func(_ *colly.Response, err error)))
 		case "reponse":
-			// testFunc, ok := h.handler.(func(r *colly.Response))
-			// // fmt.Println(testFunc)
-			// fmt.Println(ok)
-			// c.OnResponse(testFunc)
 			c.OnResponse(h.handler.(func(r *colly.Response)))
 			// c.OnResponse(h.handler)
 		case "html":

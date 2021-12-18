@@ -9,8 +9,8 @@ services:
       - 3032:3032
     volumes:
       - .:/workspaces/scraperCookie
-    # env_file:
-    #   - .devcontainer/dev.env
+    env_file:
+      - .devcontainer/dev.env
     working_dir: /workspaces/scraperCookie
     tty: true
     entrypoint: ["bash"]
