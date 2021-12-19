@@ -13,40 +13,34 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
+// Locator or index to find data in store
+type Locator []string
+
+// Base interface, should not be fed directly to scraper
 type IStore interface {
 	Init()
-	StoreJson(bucket *string, key *string, data io.ReadSeeker) error
-	Read()
-	KeyExists(k interface{}) (bool, error)
+	Store(l Locator, data io.ReadSeeker) error
+	Read(l Locator) []byte
 }
 
-// https://john.dev/posts/2019-03-31-lambda-to-s3-golang.html
-type S3Store struct {
-	Uploader  *s3manager.Uploader
+type IS3JsonStore interface {
+	IStore
+	KeyExists(l Locator) (bool, error) // check if data exists without reading the entire data
+}
+
+type S3JsonStore struct {
+	uploader  *s3manager.Uploader
 	s3Service *s3.S3
-	region    *string
-	creds     *credentials.Credentials
 }
 
-// type AWSConfig struct {
-// 	AWS_REGION            string `envconfig:"AWS_REGION"`
-// 	AWS_ACCESS_KEY_ID     string `envconfig:"AWS_ACCESS_KEY_ID"`
-// 	AWS_SECRET_ACCESS_KEY string `envconfig:"AWS_SECRET_ACCESS_KEY"`
-// }
-
-//GetEnvWithKey : get env value
-func GetEnvWithKey(key string) string {
-	return os.Getenv(key)
-}
-
-func (s *S3Store) Init() {
-	s.creds = credentials.NewEnvCredentials()
-	s.region = aws.String("us-east-1")
+func (s *S3JsonStore) Init() {
+	creds := credentials.NewEnvCredentials()
+	region := aws.String("us-east-1")
 
 	sess, err := session.NewSession(
 		&aws.Config{
-			Region:      s.region,
-			Credentials: s.creds,
+			Region:      region,
+			Credentials: creds,
 		},
 	)
 	if err != nil {
@@ -54,28 +48,28 @@ func (s *S3Store) Init() {
 	}
 
 	sess = session.Must(sess, err)
-	s.Uploader = s3manager.NewUploader(sess)
+	s.uploader = s3manager.NewUploader(sess)
 	s.s3Service = s3.New(sess)
 }
 
 // TODO
-func read(p []byte) (i int, err error) {
-	return 0, nil
+func (s *S3JsonStore) Read(l Locator) []byte {
+	fmt.Println(l)
+	return []byte{}
 }
 
-// key - location/fileName.json
-func (s S3Store) StoreJson(
-	bucket *string,
-	key *string,
+// Locator args: bucket, key - location/fileName.json
+func (s *S3JsonStore) Store(
+	l Locator,
 	data io.ReadSeeker,
 ) error {
 	// uploader
 	params := &s3manager.UploadInput{
-		Bucket: bucket,
-		Key:    key,
+		Bucket: aws.String(l[0]),
+		Key:    aws.String(l[1]),
 		Body:   data,
 	}
-	_, err := s.Uploader.Upload(params)
+	_, err := s.uploader.Upload(params)
 
 	if err != nil {
 		fmt.Println(err)
@@ -85,10 +79,10 @@ func (s S3Store) StoreJson(
 }
 
 // Check if key exists in bucket
-func (s S3Store) KeyExists(bucket string, key string) (bool, error) {
+func (s *S3JsonStore) KeyExists(l Locator) (bool, error) {
 	_, err := s.s3Service.HeadObject(&s3.HeadObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
+		Bucket: aws.String(l[0]),
+		Key:    aws.String(l[1]),
 	})
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
