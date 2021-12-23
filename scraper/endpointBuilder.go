@@ -1,3 +1,4 @@
+// Concrete builder
 package scraper
 
 import (
@@ -7,13 +8,22 @@ import (
 	"github.com/trietmnj/scraperCookie/store"
 )
 
-func (s *BaseScraper) AddStoreAccessor(st store.IStore) {
-	s.Store = st
+type endpointBuilder struct {
+	configs  []func(*colly.Collector)
+	store    store.IStore
+	handlers []ResponseHandler
 }
 
-func (s *BaseScraper) AddHandler(h CallbackHandler) error {
+func newEndPointScraperBuilder() *endpointBuilder {
+	return &endpointBuilder{}
+}
 
-	// validate that handler can fit into colly callback API
+func (b *endpointBuilder) setConfig(c CollectorConfig) {
+	b.configs = append(b.configs, c)
+}
+
+func (b *endpointBuilder) setHandler(h ResponseHandler) error {
+
 	var w interface{}
 	var ok bool
 	switch h.order {
@@ -21,8 +31,6 @@ func (s *BaseScraper) AddHandler(h CallbackHandler) error {
 		w, ok = h.handler.(func(r *colly.Request))
 	case "error":
 		w, ok = h.handler.(func(_ *colly.Response, err error))
-	// case "reponse-headers": // TODO update colly to a version with c.OnResponseHeaders()
-	// 	w, ok = h.handler.(func(r *colly.Response))
 	case "reponse":
 		w, ok = h.handler.(func(r *colly.Response))
 	case "html":
@@ -38,7 +46,19 @@ func (s *BaseScraper) AddHandler(h CallbackHandler) error {
 	if !ok {
 		return errors.New("Unable to assert handler into colly API defined callbacks")
 	} else {
-		s.handlers = append(s.handlers, CallbackHandler{h.order, h.optParam, w})
-		return nil
+		b.handlers = append(b.handlers, ResponseHandler{h.order, h.optParam, w})
+	}
+	return nil
+}
+
+func (b *endpointBuilder) setStore(s store.IStore) {
+	b.store = s
+}
+
+func (b *endpointBuilder) getScraper() scraper {
+	return scraper{
+		configs:  b.configs,
+		store:    b.store,
+		handlers: b.handlers,
 	}
 }

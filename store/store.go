@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -14,12 +15,16 @@ import (
 )
 
 // Locator or index to find data in store
+// l[0] = bucket
+// l[1] = source
+// l[2] = repo
+// l[3] = url
 type Locator []string
 
 // Base interface, should not be fed directly to scraper
 type IStore interface {
 	Init()
-	Store(l Locator, data io.ReadSeeker) error
+	Store(l Locator, data io.Reader) error
 	Read(l Locator) []byte
 }
 
@@ -61,12 +66,16 @@ func (s *S3JsonStore) Read(l Locator) []byte {
 // Locator args: bucket, key - location/fileName.json
 func (s *S3JsonStore) Store(
 	l Locator,
-	data io.ReadSeeker,
+	data io.Reader,
 ) error {
-	// uploader
+	var key string
+	key = "bronze/ingest/" + l[1] + "/" + l[2] + "/" + l[3]
+	if !strings.HasSuffix(key, ".json") {
+		key += ".json"
+	}
 	params := &s3manager.UploadInput{
 		Bucket: aws.String(l[0]),
-		Key:    aws.String(l[1]),
+		Key:    aws.String(key),
 		Body:   data,
 	}
 	_, err := s.uploader.Upload(params)

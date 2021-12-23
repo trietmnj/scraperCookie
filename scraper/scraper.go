@@ -1,3 +1,4 @@
+// Concrete product
 package scraper
 
 import (
@@ -5,31 +6,34 @@ import (
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/queue"
-	"github.com/trietmnj/scraperCookie/rest"
+	"github.com/trietmnj/scraperCookie/store"
 )
 
-func (s EndpointScraper) Scrape() error {
+type scraper struct {
+	configs  []func(*colly.Collector) // configure colly collector
+	store    store.IStore             // has Init(), Read(), and Write()
+	handlers []ResponseHandler        // response handlers
+}
+
+func (s scraper) Scrape(urls []string) error {
 
 	// add config
 	c := colly.NewCollector(
-		s.config...,
+		s.configs...,
 	)
 
 	// add URLs
 	q, err := queue.New(
-		2,
+		5,
 		&queue.InMemoryQueueStorage{MaxSize: 100000},
 	)
 	if err != nil {
 		return err
 	}
-	for _, url := range s.list {
+	for _, url := range urls {
 		q.AddURL(url)
 	}
 
-	// add handlers
-	// TODO find a safer approach
-	// TODO update colly to a version with colly.Collector.OnResponseHeaders available
 	for _, h := range s.handlers {
 		switch h.order {
 		case "request":
@@ -38,7 +42,6 @@ func (s EndpointScraper) Scrape() error {
 			c.OnError(h.handler.(func(_ *colly.Response, err error)))
 		case "reponse":
 			c.OnResponse(h.handler.(func(r *colly.Response)))
-			// c.OnResponse(h.handler)
 		case "html":
 			c.OnHTML(h.optParam, h.handler.(func(e *colly.HTMLElement)))
 		case "xml":
@@ -55,19 +58,4 @@ func (s EndpointScraper) Scrape() error {
 		return err
 	}
 	return nil
-}
-
-// Add a list of URLs to the scraper. Unique for EndpointScraper.
-func (s *EndpointScraper) AddURLs(l rest.URLList) {
-	s.list = l
-}
-
-// Add optional *colly.Collector configs
-func (s *EndpointScraper) AddConfig(c CollectorConfig) {
-
-	requiredConfigs := []func(*colly.Collector){
-		colly.MaxDepth(1),
-	}
-
-	s.config = append(c, requiredConfigs...)
 }

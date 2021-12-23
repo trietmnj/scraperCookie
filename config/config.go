@@ -6,9 +6,11 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
+type IConfigProvider interface {
+	ProvideConfig() Config
+}
+
 type Config struct {
-	AwsS3Region string
-	AwsS3Bucket string
 }
 
 // Load config from env vars
