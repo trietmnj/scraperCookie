@@ -18,6 +18,7 @@ func Test_upload(t *testing.T) {
 	fmt.Println(err)
 }
 
+// TODO add in Locator fields correspond to new structures
 func Test_keyExists(t *testing.T) {
 	s.Init()
 	exists, _ := s.KeyExists(Locator{"finance-lake", "bronze/ingest/vic/ideasum-json/test.json"})

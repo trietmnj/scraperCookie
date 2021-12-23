@@ -7,17 +7,20 @@ import (
 )
 
 type IConfigProvider interface {
-	ProvideConfig() Config
+	ProvideConfig() config
 }
 
-type Config struct {
+type config struct {
+	Bucket, DataSource, RepoName string
 }
 
 // Load config from env vars
-func (c Config) Init() {
+func Init() config {
+	var c config
 	if err := envconfig.Process("", &c); err != nil {
 		log.Fatal(err.Error())
 	}
+	return c
 }
 
 // func (c Config) String() {
