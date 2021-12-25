@@ -17,3 +17,13 @@ This repo is a generalized library. Each specific implementation should include 
                 Store(l Locator, data io.Reader) error
                 Read(l Locator) []byte
             }
+
+
+Config should be located in .devcontainer/dev.env - BUCKET, DATASOURCE, REPONAME are used with S3JsonStore.
+
+    AWS_REGION = 
+    AWS_ACCESS_KEY_ID = 
+    AWS_SECRET_ACCESS_KEY = 
+    BUCKET = 
+    DATASOURCE = 
+    REPONAME = 
