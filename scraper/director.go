@@ -3,7 +3,6 @@ package scraper
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 
 	"github.com/gocolly/colly"
@@ -42,7 +41,6 @@ func (d *director) BuildScraper(s store.IStore) scraper {
 	d.builder.setHandler(ResponseHandler{
 		"reponse", "",
 		func(r *colly.Response) {
-			fmt.Println("Visited", r.Request.URL)
 			if r.StatusCode == 200 {
 				l := store.Locator{
 					cfg.Bucket, cfg.DataSource, cfg.RepoName, strings.ReplaceAll(r.Request.URL.String(), "/", "-"),
