@@ -16,7 +16,7 @@ type director struct {
 	builder iBuilder
 }
 
-func newDirector(b iBuilder) *director {
+func NewDirector(b iBuilder) *director {
 	return &director{
 		builder: b,
 	}

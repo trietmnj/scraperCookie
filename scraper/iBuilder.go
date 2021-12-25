@@ -13,7 +13,7 @@ type iBuilder interface {
 	getScraper() scraper
 }
 
-func getScraperBuilder(scraperType string) iBuilder {
+func GetScraperBuilder(scraperType string) iBuilder {
 	switch scraperType {
 	case "EndpointJson":
 		return &endpointBuilder{}
