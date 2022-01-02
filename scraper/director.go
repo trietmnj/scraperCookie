@@ -3,6 +3,7 @@ package scraper
 
 import (
 	"bytes"
+	"log"
 	"strings"
 
 	"github.com/gocolly/colly"
@@ -30,24 +31,60 @@ func (d *director) setBuilder(b iBuilder) {
 //  Bucket
 //  DataSource
 //  RepoName
-func (d *director) BuildScraper(s store.IStore) scraper {
-	d.builder.setConfig(colly.UserAgent(
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36",
-	))
-	d.builder.setConfig(colly.Debugger(&debug.LogDebugger{}))
-	d.builder.setStore(s)
+func (d *director) BuildScraper(s store.IStore, urls []string) scraper {
+	switch d.builder.(type) {
 
-	cfg := config.Init()
-	d.builder.setHandler(ResponseHandler{
-		"reponse", "",
-		func(r *colly.Response) {
-			if r.StatusCode == 200 {
-				l := store.Locator{
-					cfg.Bucket, cfg.DataSource, cfg.RepoName, strings.ReplaceAll(r.Request.URL.String(), "/", "-"),
+	// endpointBuilder
+	case *endpointBuilder:
+		d.builder.setConfig(colly.UserAgent(
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36",
+		))
+		d.builder.setConfig(colly.Debugger(&debug.LogDebugger{}))
+		d.builder.setStore(s)
+
+		cfg := config.Init()
+
+		// response handler
+		d.builder.setHandler(ResponseHandler{
+			"reponse", "",
+			func(r *colly.Response) {
+				if r.StatusCode == 200 {
+					l := store.Locator{
+						cfg.Bucket, cfg.DataSource, cfg.RepoName, strings.ReplaceAll(r.Request.URL.String(), "/", "-"),
+					}
+					s.Store(l, bytes.NewReader(r.Body))
 				}
-				s.Store(l, bytes.NewReader(r.Body))
-			}
-		},
-	})
+			},
+		})
+
+		// error handler
+		d.builder.setHandler(ResponseHandler{
+			"error", "",
+			func(r *colly.Response, err error) {
+				log.Fatal(err.Error())
+			},
+		})
+
+		// htmlTableBuilder
+	case *htmlTableBuilder:
+		d.builder.setConfig(colly.UserAgent(
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36",
+		))
+		d.builder.setConfig(colly.Debugger(&debug.LogDebugger{}))
+		d.builder.setStore(s)
+
+		cfg := config.Init()
+
+		// html handler requires args from url
+		// error handler
+		d.builder.setHandler(ResponseHandler{
+			"error", "",
+			func(r *colly.Response, err error) {
+				log.Fatal(err.Error())
+			},
+		})
+	default:
+		panic("director unable to build scraper")
+	}
 	return d.builder.getScraper()
 }

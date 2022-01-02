@@ -13,10 +13,16 @@ type iBuilder interface {
 	getScraper() scraper
 }
 
-func GetScraperBuilder(scraperType string) iBuilder {
+type iBuilderParams interface {
+	Parameters()
+}
+
+func NewScraperBuilder(scraperType string) iBuilder {
 	switch scraperType {
 	case "EndpointJson":
 		return &endpointBuilder{}
+	case "HtmlTable":
+		return &htmlTableBuilder{}
 	default:
 		// errors.New("Unable to create scraper object for scraperType: " + scrapescraperType)
 		return nil

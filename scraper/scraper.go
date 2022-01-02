@@ -15,7 +15,7 @@ type scraper struct {
 	handlers []ResponseHandler        // response handlers
 }
 
-func (s scraper) Scrape(urls []string) error {
+func (s scraper) Scrape() error {
 
 	// add config
 	c := colly.NewCollector(
