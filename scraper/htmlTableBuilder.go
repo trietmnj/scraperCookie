@@ -8,29 +8,33 @@ import (
 	"github.com/trietmnj/scraperCookie/store"
 )
 
-type endpointBuilder struct {
+type htmlTableBuilder struct {
 	configs  []func(*colly.Collector)
 	store    store.IStore
 	handlers []ResponseHandler
+	urls     []string
 }
 
-func newEndPointScraperBuilder() *endpointBuilder {
-	return &endpointBuilder{}
+func newHtmlTableBuilder() *htmlTableBuilder {
+	return &htmlTableBuilder{}
 }
 
-func (b *endpointBuilder) setConfig(c CollectorConfig) {
+func (b *htmlTableBuilder) setConfig(c CollectorConfig) {
 	b.configs = append(b.configs, c)
 }
 
-func (b *endpointBuilder) setHandler(h ResponseHandler) error {
+func (b *htmlTableBuilder) setHandler(h ResponseHandler) error {
 
 	var w interface{}
 	var ok bool
 	switch h.order {
 	case "error":
 		w, ok = h.handler.(func(_ *colly.Response, err error))
-	case "reponse":
-		w, ok = h.handler.(func(r *colly.Response))
+	case "html":
+		w, ok = h.handler.(func(e *colly.HTMLElement))
+		if h.optParam == "" {
+			ok = false
+		}
 	default:
 		ok = false
 	}
@@ -43,14 +47,17 @@ func (b *endpointBuilder) setHandler(h ResponseHandler) error {
 	return nil
 }
 
-func (b *endpointBuilder) setStore(s store.IStore) {
+func (b *htmlTableBuilder) setStore(s store.IStore) {
 	b.store = s
 }
 
-func (b *endpointBuilder) getScraper() scraper {
+func (b *htmlTableBuilder) getScraper() scraper {
 	return scraper{
 		configs:  b.configs,
 		store:    b.store,
 		handlers: b.handlers,
 	}
 }
+
+// func (p HtmlTableBuilderParams) Parameters() {
+// }

@@ -1,3 +1,4 @@
+// TODO Dangling dependency - consider removing
 package rest
 
 import "github.com/trietmnj/scraperCookie/utils"

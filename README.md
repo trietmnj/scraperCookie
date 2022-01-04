@@ -10,6 +10,9 @@ This repo is a generalized library. Each specific implementation should include 
         to a scraper that is only partially constructed
         https://golangbyexample.com/builder-pattern-golang/?__cf_chl_managed_tk__=Yel6VzlV22y4b1iWKlNVx7STpGlu2tQHo52ZSr.RWV0-1639966741-0-gaNycGzNChE
 
+        endpointScraper implemented - target API endpoints that returns a JSON
+        htmlTableScraper in progress
+
     > Store
         Automated store as an abstract interface
             type IStore interface {
@@ -21,9 +24,9 @@ This repo is a generalized library. Each specific implementation should include 
 
 Config should be located in .devcontainer/dev.env - BUCKET, DATASOURCE, REPONAME are used with S3JsonStore.
 
-    AWS_REGION = 
-    AWS_ACCESS_KEY_ID = 
-    AWS_SECRET_ACCESS_KEY = 
-    BUCKET = 
-    DATASOURCE = 
-    REPONAME = 
+    AWS_REGION =
+    AWS_ACCESS_KEY_ID =
+    AWS_SECRET_ACCESS_KEY =
+    BUCKET =
+    DATASOURCE =
+    REPONAME =

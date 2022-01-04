@@ -15,11 +15,10 @@ import (
 )
 
 // Locator or index to find data in store
-// l[0] = bucket
-// l[1] = source
-// l[2] = repo
-// l[3] = url
-type Locator []string
+//  Example: "finance-lake/test.json"
+//  bucket: finance-lake
+//  key: test.json
+type Locator string
 
 // Base interface, should not be fed directly to scraper
 type IStore interface {
@@ -33,9 +32,26 @@ type IS3JsonStore interface {
 	KeyExists(l Locator) (bool, error) // check if data exists without reading the entire data
 }
 
-type S3JsonStore struct {
+type S3Store struct {
 	uploader  *s3manager.Uploader
 	s3Service *s3.S3
+}
+
+func NewStore(sType string) (*IStore, error) {
+	switch sType {
+	case "text":
+		s := S3JsonStore{}
+		s.Init()
+		return &s, nil
+	default:
+		return IStore{}, fmt.Errorf("store: unable to generate new store")
+	}
+}
+
+func NewS3JsonStore() *S3JsonStore {
+	s := S3JsonStore{}
+	s.Init()
+	return &s
 }
 
 func (s *S3JsonStore) Init() {
