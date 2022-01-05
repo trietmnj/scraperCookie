@@ -6,9 +6,8 @@ import (
 	"testing"
 )
 
-var s = TextStore{}
-
 func Test_upload(t *testing.T) {
+	s, err := NewStore("s3")
 	s.Init()
 	err := s.Store(
 		Locator{"finance-lake", "bronze/ingest/vic/ideasum-json/test.json"},
@@ -27,12 +26,11 @@ func Test_keyExists(t *testing.T) {
 	fmt.Println(exists)
 }
 
-func ExampleTextStore() {
-	s, err := NewStore("text")
+func ExampleS3Store() {
+	s, err := NewStore("s3")
 	if err != nil {
+		panic("unable initialize s3 store")
 	}
-
-	s := &CSVStore{}
 	l := Locator{"finance-lake"}
 	s.Store(l, strings.NewReader(""))
 
