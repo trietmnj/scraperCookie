@@ -1,6 +1,9 @@
 package scraper
 
 import (
+	"testing"
+
+	"github.com/trietmnj/scraperCookie/config"
 	"github.com/trietmnj/scraperCookie/store"
 )
 
@@ -20,7 +23,7 @@ func ExampleEndpointScraper() {
 
 // ExampleHtmlTableScraper is an example of a scraper that parse
 // data based on an HTML <table> tag
-func ExampleHtmlTableScraper() {
+func TestHtmlTableScraper(t *testing.T) {
 	// Director directs specific builder
 	htmlTableBuilder := NewScraperBuilder("HtmlTable")
 	director := NewDirector(htmlTableBuilder)
@@ -37,6 +40,7 @@ func ExampleHtmlTableScraper() {
 		// "table.table-responsive.fpl-list",
 	}
 	s, _ := store.NewStore("s3")
-	htmlTableScraper, _ := director.BuildScraper("data/config.json", s, urlHtml)
+	c, _ := config.NewConfig("data/config.json")
+	htmlTableScraper, _ := director.BuildScraper(c, s, urlHtml)
 	htmlTableScraper.Scrape()
 }

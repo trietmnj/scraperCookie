@@ -28,7 +28,7 @@ func (d *director) setBuilder(b iBuilder) {
 }
 
 // urlSelectors is a list of url and goquery selectors for htmlTableBuilder
-func (d *director) BuildScraper(configJson string, s store.IStore, urlSelectors []string) (scraper, error) {
+func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []string) (scraper, error) {
 	var err error
 	switch d.builder.(type) {
 
@@ -39,7 +39,6 @@ func (d *director) BuildScraper(configJson string, s store.IStore, urlSelectors 
 		d.builder.setConfig(colly.Debugger(&debug.LogDebugger{}))
 		d.builder.setStore(s)
 
-		cfg, err := config.NewConfig(configJson)
 		if err != nil {
 			return scraper{}, err
 		}
@@ -50,8 +49,8 @@ func (d *director) BuildScraper(configJson string, s store.IStore, urlSelectors 
 			func(r *colly.Response) {
 				if r.StatusCode == 200 {
 					l := store.Locator{
-						Key:    "ingest/" + cfg.Repo + "/" + strings.ReplaceAll(r.Request.URL.String(), "/", "-"),
-						Bucket: cfg.Bucket,
+						Key:    "ingest/" + c.Repo + "/" + strings.ReplaceAll(r.Request.URL.String(), "/", "-"),
+						Bucket: c.Bucket,
 					}
 					s.Store(l, bytes.NewReader(r.Body))
 				}
@@ -93,6 +92,7 @@ func (d *director) BuildScraper(configJson string, s store.IStore, urlSelectors 
 		// add handler specific to each url
 		for i := 0; i < int(len(urls)/2); i++ {
 			// html handler requires args from url
+			// TODO something still wrong with setting this handler
 			d.builder.setHandler(ResponseHandler{
 				order:    "html",
 				optParam: urls[i*2+1],
@@ -115,6 +115,7 @@ func (d *director) BuildScraper(configJson string, s store.IStore, urlSelectors 
 						data = append(data, rowData)
 					})
 
+					fmt.Println(data)
 					// doc.Find(".spy1x").Each()
 					// l := store.Locator{}
 					// s.Store(l)
