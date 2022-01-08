@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func Test_upload(t *testing.T) {
+func ExampleS3StoreUpload(t *testing.T) {
 	s, err := NewStore("s3")
 	s.Init()
-	err := s.Store(
+	err = s.Store(
 		Locator{"finance-lake", "bronze/ingest/vic/ideasum-json/test.json"},
 		strings.NewReader(
 			`{"title":"Survey Test","description":"This is a description of the test survey","active":true}`,

@@ -96,7 +96,7 @@ func (d *director) BuildScraper(configJson string, s store.IStore, urlSelectors 
 			d.builder.setHandler(ResponseHandler{
 				order:    "html",
 				optParam: urls[i*2+1],
-				handler: func(e *colly.HTMLElement) {
+				handler: func(table colly.HTMLElement) {
 
 					// doc, err := goquery.NewDocumentFromReader(strings.NewReader(e.Text))
 					// if err != nil {
@@ -105,15 +105,19 @@ func (d *director) BuildScraper(configJson string, s store.IStore, urlSelectors 
 
 					// parse into 2d string matrix
 					var data [][]string
+					var rowData []string
 					// iterate over rows
-					e.ForEach("tr", func(idx int, e2 *colly.HTMLElement) {
-						e2.ChildAttr()
-						data = append(data)
+					table.ForEach("tr", func(_ int, row *colly.HTMLElement) {
+						rowData = make([]string, 0)
+						row.ForEach("td", func(_ int, cell *colly.HTMLElement) {
+							rowData = append(rowData, cell.Text)
+						})
+						data = append(data, rowData)
 					})
 
 					// doc.Find(".spy1x").Each()
-					l := store.Locator{}
-					s.Store(l)
+					// l := store.Locator{}
+					// s.Store(l)
 				},
 			})
 		}
