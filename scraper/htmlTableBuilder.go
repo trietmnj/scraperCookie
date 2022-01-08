@@ -9,10 +9,11 @@ import (
 )
 
 type htmlTableBuilder struct {
-	configs  []func(*colly.Collector)
-	store    store.IStore
-	handlers []ResponseHandler
-	urls     []string
+	configs   []func(*colly.Collector)
+	store     store.IStore
+	handlers  []ResponseHandler
+	urls      []string
+	selectors []string
 }
 
 func newHtmlTableBuilder() *htmlTableBuilder {
@@ -51,13 +52,20 @@ func (b *htmlTableBuilder) setStore(s store.IStore) {
 	b.store = s
 }
 
-func (b *htmlTableBuilder) getScraper() scraper {
-	return scraper{
-		configs:  b.configs,
-		store:    b.store,
-		handlers: b.handlers,
-	}
+func (b *htmlTableBuilder) setSelectors(s []string) {
+	b.selectors = s
 }
 
-// func (p HtmlTableBuilderParams) Parameters() {
-// }
+func (b *htmlTableBuilder) setUrls(u []string) {
+	b.urls = u
+}
+
+func (b *htmlTableBuilder) getScraper() scraper {
+	return scraper{
+		configs:   b.configs,
+		store:     b.store,
+		handlers:  b.handlers,
+		urls:      b.urls,
+		selectors: b.selectors,
+	}
+}

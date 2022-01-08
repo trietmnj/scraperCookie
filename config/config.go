@@ -14,7 +14,7 @@ import (
 // 	Bucket, DataSource, RepoName string
 // }
 
-type config struct {
+type Config struct {
 	Bucket string `json:"bucket"`
 	Repo   string `json:"repo"`
 }
@@ -34,19 +34,19 @@ type config struct {
 // }
 
 // Load config from config.json
-func NewConfig(path string) (config, error) {
+func NewConfig(path string) (Config, error) {
 	jsonFile, err := os.Open(path)
 	if err != nil {
-		return config{}, err
+		return Config{}, err
 	}
 	defer jsonFile.Close()
 
 	jsonByte, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		return config{}, err
+		return Config{}, err
 	}
 
-	var c config
+	var c Config
 	json.Unmarshal(jsonByte, &c)
 	return c, err
 }

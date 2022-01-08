@@ -7,8 +7,8 @@ import (
 
 // Locator or index to find data in store
 type Locator struct {
-	key    string
-	bucket string
+	Key    string
+	Bucket string
 }
 
 // Base interface, should not be fed directly to scraper

@@ -10,6 +10,8 @@ type iBuilder interface {
 	setConfig(c CollectorConfig)
 	setStore(s store.IStore) // data storage accessor
 	setHandler(h ResponseHandler) error
+	setSelectors(s []string)
+	setUrls(u []string)
 	getScraper() scraper
 }
 

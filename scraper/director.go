@@ -27,17 +27,11 @@ func (d *director) setBuilder(b iBuilder) {
 	d.builder = b
 }
 
-// TODO refactor ResponseHandler
-// current ResponseHandler requires env cfg dependencies:
-//  Bucket
-//  DataSource
-//  RepoName
-func (d *director) BuildScraper(s store.IStore, urls []string) (scraper, error) {
-
+// urlSelectors is a list of url and goquery selectors for htmlTableBuilder
+func (d *director) BuildScraper(configJson string, s store.IStore, urlSelectors []string) (scraper, error) {
 	var err error
 	switch d.builder.(type) {
 
-	// endpointBuilder requires a JSON store
 	case *endpointBuilder:
 		d.builder.setConfig(colly.UserAgent(
 			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36",
@@ -45,7 +39,10 @@ func (d *director) BuildScraper(s store.IStore, urls []string) (scraper, error) 
 		d.builder.setConfig(colly.Debugger(&debug.LogDebugger{}))
 		d.builder.setStore(s)
 
-		cfg := config.NewConfig()
+		cfg, err := config.NewConfig(configJson)
+		if err != nil {
+			return scraper{}, err
+		}
 
 		// response handler
 		d.builder.setHandler(ResponseHandler{
@@ -53,7 +50,8 @@ func (d *director) BuildScraper(s store.IStore, urls []string) (scraper, error) 
 			func(r *colly.Response) {
 				if r.StatusCode == 200 {
 					l := store.Locator{
-						cfg.Bucket, cfg.DataSource, cfg.RepoName, strings.ReplaceAll(r.Request.URL.String(), "/", "-"),
+						Key:    "ingest/" + cfg.Repo + "/" + strings.ReplaceAll(r.Request.URL.String(), "/", "-"),
+						Bucket: cfg.Bucket,
 					}
 					s.Store(l, bytes.NewReader(r.Body))
 				}
@@ -76,12 +74,21 @@ func (d *director) BuildScraper(s store.IStore, urls []string) (scraper, error) 
 		d.builder.setConfig(colly.Debugger(&debug.LogDebugger{}))
 		d.builder.setStore(s)
 
-		cfg := config.NewConfig()
-
 		// urls slice not a multiple of 2
-		if len(urls)%2 != 0 {
+		if len(urlSelectors)%2 != 0 {
 			return d.builder.getScraper(), fmt.Errorf("director: urls length must be even")
 		}
+		var urls []string
+		var selectors []string
+		for i, str := range urlSelectors {
+			if i%2 == 0 {
+				urls = append(urls, str)
+			} else {
+				selectors = append(selectors, str)
+			}
+		}
+		d.builder.setSelectors(selectors)
+		d.builder.setUrls(urls)
 
 		// add handler specific to each url
 		for i := 0; i < int(len(urls)/2); i++ {

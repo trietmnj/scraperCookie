@@ -9,9 +9,11 @@ import (
 )
 
 type endpointBuilder struct {
-	configs  []func(*colly.Collector)
-	store    store.IStore
-	handlers []ResponseHandler
+	configs   []func(*colly.Collector)
+	store     store.IStore
+	handlers  []ResponseHandler
+	selectors []string
+	urls      []string
 }
 
 func newEndPointScraperBuilder() *endpointBuilder {
@@ -45,6 +47,14 @@ func (b *endpointBuilder) setHandler(h ResponseHandler) error {
 
 func (b *endpointBuilder) setStore(s store.IStore) {
 	b.store = s
+}
+
+func (b *endpointBuilder) setSelectors(s []string) {
+	b.selectors = s
+}
+
+func (b *endpointBuilder) setUrls(u []string) {
+	b.urls = u
 }
 
 func (b *endpointBuilder) getScraper() scraper {

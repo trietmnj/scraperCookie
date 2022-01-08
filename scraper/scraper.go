@@ -2,7 +2,7 @@
 package scraper
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/queue"
@@ -10,9 +10,11 @@ import (
 )
 
 type scraper struct {
-	configs  []func(*colly.Collector) // configure colly collector
-	store    store.IStore             // has Init(), Read(), and Write()
-	handlers []ResponseHandler        // response handlers
+	configs   []func(*colly.Collector) // configure colly collector
+	store     store.IStore             // has Init(), Read(), and Write()
+	handlers  []ResponseHandler        // response handlers
+	urls      []string                 // list of urls to query
+	selectors []string                 // optional string slice with selectors specific to each url
 }
 
 func (s scraper) Scrape() error {
@@ -30,7 +32,7 @@ func (s scraper) Scrape() error {
 	if err != nil {
 		return err
 	}
-	for _, url := range urls {
+	for _, url := range s.urls {
 		q.AddURL(url)
 	}
 
@@ -49,7 +51,7 @@ func (s scraper) Scrape() error {
 		case "scraped":
 			c.OnScraped(h.handler.(func(r *colly.Response)))
 		default:
-			return errors.New("colly callback API not available for order: " + h.order)
+			return fmt.Errorf("scraper: invalid handler order - " + h.order)
 		}
 	}
 

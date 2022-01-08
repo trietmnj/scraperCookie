@@ -13,9 +13,8 @@ func ExampleEndpointScraper() {
 		"https://httpbin.org/get",
 		"http://localhost:3031/nsisapi/version",
 	}
-	s := store.TextStore{}
-	s.Init()
-	endpointJsonScraper := director.BuildScraper(&s, urls)
+	s, _ := store.NewStore("s3")
+	endpointJsonScraper, _ := director.BuildScraper("data/config.json", s, urls)
 	endpointJsonScraper.Scrape()
 }
 
@@ -37,8 +36,7 @@ func ExampleHtmlTableScraper() {
 		// "https://www.us-proxy.org/",
 		// "table.table-responsive.fpl-list",
 	}
-
-	s := store.NewS3JsonStore()
-	htmlTableScraper := director.BuildScraper(s, urlHtml)
+	s, _ := store.NewStore("s3")
+	htmlTableScraper, _ := director.BuildScraper("data/config.json", s, urlHtml)
 	htmlTableScraper.Scrape()
 }
