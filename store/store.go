@@ -20,12 +20,15 @@ type IStore interface {
 
 // Factory method to generate store
 func NewStore(sType string) (IStore, error) {
+	var s IStore
 	switch sType {
 	case "s3":
-		s := S3Store{}
-		s.Init()
-		return &s, nil
+		s = &s3Store{}
+	case "local":
+		s = &localStore{}
 	default:
-		return &S3Store{}, fmt.Errorf("store: unable to generate new store")
+		return nil, fmt.Errorf("store: unable to generate new store")
 	}
+	s.Init()
+	return s, nil
 }

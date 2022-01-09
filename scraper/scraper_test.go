@@ -3,6 +3,7 @@ package scraper
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/trietmnj/scraperCookie/config"
 	"github.com/trietmnj/scraperCookie/store"
 )
@@ -17,7 +18,8 @@ func ExampleEndpointScraper() {
 		"http://localhost:3031/nsisapi/version",
 	}
 	s, _ := store.NewStore("s3")
-	endpointJsonScraper, _ := director.BuildScraper("data/config.json", s, urls)
+	c, _ := config.NewConfig("data/config.json")
+	endpointJsonScraper, _ := director.BuildScraper(c, s, urls)
 	endpointJsonScraper.Scrape()
 }
 
@@ -35,12 +37,16 @@ func TestHtmlTableScraper(t *testing.T) {
 	// each url should be coupled with a selector
 	urlHtml := []string{
 		"https://spys.one/en/socks-proxy-list/",
-		"td table:first",
+		"table",
+		// "td table:first",
 		// "https://www.us-proxy.org/",
 		// "table.table-responsive.fpl-list",
 	}
-	s, _ := store.NewStore("s3")
-	c, _ := config.NewConfig("data/config.json")
-	htmlTableScraper, _ := director.BuildScraper(c, s, urlHtml)
+	s, err := store.NewStore("s3")
+	assert.Nil(t, err)
+	c, err := config.NewConfig("/workspaces/scraperCookie/data/config.json")
+	assert.Nil(t, err)
+	htmlTableScraper, err := director.BuildScraper(c, s, urlHtml)
+	assert.Nil(t, err)
 	htmlTableScraper.Scrape()
 }

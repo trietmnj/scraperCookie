@@ -90,18 +90,12 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 		d.builder.setUrls(urls)
 
 		// add handler specific to each url
-		for i := 0; i < int(len(urls)/2); i++ {
+		for _, selector := range selectors {
 			// html handler requires args from url
-			// TODO something still wrong with setting this handler
 			d.builder.setHandler(ResponseHandler{
 				order:    "html",
-				optParam: urls[i*2+1],
-				handler: func(table colly.HTMLElement) {
-
-					// doc, err := goquery.NewDocumentFromReader(strings.NewReader(e.Text))
-					// if err != nil {
-					// 	fmt.Errorf("response handler error: unable to parse html to table")
-					// }
+				optParam: selector,
+				handler: func(table *colly.HTMLElement) {
 
 					// parse into 2d string matrix
 					var data [][]string

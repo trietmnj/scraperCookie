@@ -14,13 +14,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-// S3Store Init() using env credentials
-type S3Store struct {
+// s3Store Init() using env credentials
+type s3Store struct {
 	uploader  *s3manager.Uploader
 	s3Service *s3.S3
 }
 
-func (s *S3Store) Init() {
+func (s *s3Store) Init() {
 	creds := credentials.NewEnvCredentials()
 	region := aws.String("us-east-1")
 
@@ -40,13 +40,12 @@ func (s *S3Store) Init() {
 }
 
 // TODO
-func (s *S3Store) Read(l Locator) []byte {
-	fmt.Println(l)
+func (s *s3Store) Read(l Locator) []byte {
 	return []byte{}
 }
 
 // Locator args: bucket, key - location/fileName.json
-func (s *S3Store) Store(
+func (s *s3Store) Store(
 	l Locator,
 	data io.Reader,
 ) error {
@@ -69,7 +68,7 @@ func (s *S3Store) Store(
 }
 
 // Check if key exists in bucket
-func (s *S3Store) KeyExists(l Locator) (bool, error) {
+func (s *s3Store) KeyExists(l Locator) (bool, error) {
 	key := l.Key
 	if !strings.HasSuffix(key, ".json") {
 		key += ".json"
