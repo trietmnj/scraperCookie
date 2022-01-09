@@ -40,7 +40,7 @@ func TestLocalStore(t *testing.T) {
 	s, err := NewStore("local")
 	err = s.Store(
 		Locator{
-			Bucket: "",
+			Bucket: "repo",
 			Key:    "test.json",
 		},
 		strings.NewReader(

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/trietmnj/scraperCookie/utils"
 )
 
 // LOCAL_STOREPATH has to be available as an env var
@@ -35,8 +36,9 @@ func (s *localStore) Read(l Locator) []byte {
 }
 
 func (s *localStore) Store(l Locator, data io.Reader) error {
-	path := filepath.Join(s.StorePath, l.Key)
-	file, err := os.Create(path)
+	filePath := filepath.Join(s.StorePath, l.Bucket, l.Key)
+	err := os.MkdirAll(utils.Path(filePath), os.ModePerm)
+	file, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
