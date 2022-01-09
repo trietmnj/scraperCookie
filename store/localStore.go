@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/kelseyhightower/envconfig"
 )
@@ -34,7 +35,8 @@ func (s *localStore) Read(l Locator) []byte {
 }
 
 func (s *localStore) Store(l Locator, data io.Reader) error {
-	file, err := os.Create(s.StorePath + l.Key)
+	path := filepath.Join(s.StorePath, l.Key)
+	file, err := os.Create(path)
 	if err != nil {
 		return err
 	}
@@ -42,7 +44,9 @@ func (s *localStore) Store(l Locator, data io.Reader) error {
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(data)
-	file.Write(buf.Bytes())
+
+	bytesData := buf.Bytes()
+	_, err = file.Write(bytesData)
 
 	return err
 }

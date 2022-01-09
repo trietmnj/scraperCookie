@@ -1,2 +1,4 @@
 .devcontainer/
 config.json
+
+data/

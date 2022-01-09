@@ -41,10 +41,11 @@ func TestLocalStore(t *testing.T) {
 	err = s.Store(
 		Locator{
 			Bucket: "",
-			Key:    "/workspaces/cookieScraper/data/test.json",
+			Key:    "test.json",
 		},
 		strings.NewReader(
-			`{"title":"Survey Test","description":"This is a description of the test survey","active":true}`,
+			// `{"title":"Survey Test","description":"This is a description of the test survey","active":true}`,
+			`{"title":"Survey Test","description":"This is a description of the test survey","active":false}`,
 		))
 	fmt.Println(err)
 }
