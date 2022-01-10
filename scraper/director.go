@@ -29,16 +29,20 @@ func (d *director) setBuilder(b iBuilder) {
 
 // urlSelectors is a list of url and goquery selectors for htmlTableBuilder
 func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []string) (scraper, error) {
+
+	// Common components for all scraper types
+	d.builder.setConfig(colly.UserAgent(
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36",
+	))
+	d.builder.setConfig(colly.Debugger(&debug.LogDebugger{}))
+	d.builder.setStore(s)
+
+	//TODO - add in date/time meta to folder structure
+
 	var err error
 	switch d.builder.(type) {
 
 	case *endpointBuilder:
-		d.builder.setConfig(colly.UserAgent(
-			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36",
-		))
-		d.builder.setConfig(colly.Debugger(&debug.LogDebugger{}))
-		d.builder.setStore(s)
-
 		if err != nil {
 			return scraper{}, err
 		}
@@ -67,11 +71,6 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 
 	// htmlTableBuilder requires a CSV store
 	case *htmlTableBuilder:
-		d.builder.setConfig(colly.UserAgent(
-			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36",
-		))
-		d.builder.setConfig(colly.Debugger(&debug.LogDebugger{}))
-		d.builder.setStore(s)
 
 		// urls slice not a multiple of 2
 		if len(urlSelectors)%2 != 0 {
@@ -96,23 +95,32 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 				order:    "html",
 				optParam: selector,
 				handler: func(table *colly.HTMLElement) {
-
-					// parse into 2d string matrix
-					var data [][]string
+					var data []string // parse into 2d string matrix
 					var rowData []string
-					// iterate over rows
 					table.ForEach("tr", func(_ int, row *colly.HTMLElement) {
 						rowData = make([]string, 0)
 						row.ForEach("td", func(_ int, cell *colly.HTMLElement) {
 							rowData = append(rowData, cell.Text)
 						})
-						data = append(data, rowData)
+						data = append(data, strings.Join(rowData, ","))
 					})
+					dataStr := strings.Join(data, "\n")
 
-					fmt.Println(data)
-					// doc.Find(".spy1x").Each()
-					// l := store.Locator{}
-					// s.Store(l)
+					// search for new key
+					var key string
+					key = "ingest/" + c.Repo + "/" + strings.ReplaceAll(table.Request.URL.String(), "/", "-") + "/" + "table-"
+					var exists bool
+					var i int
+					i = 0
+					exists = true
+					for exists {
+						exists, _ = s.KeyExists(store.Locator{Key: key + string(i), Bucket: c.Bucket})
+					}
+
+					s.Store(store.Locator{
+						Key:    key + string(i),
+						Bucket: c.Bucket,
+					}, strings.NewReader(dataStr))
 				},
 			})
 		}

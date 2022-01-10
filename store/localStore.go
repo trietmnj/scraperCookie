@@ -2,6 +2,8 @@ package store
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -11,6 +13,7 @@ import (
 	"github.com/trietmnj/scraperCookie/utils"
 )
 
+// TODO should local store really take config from env
 // LOCAL_STOREPATH has to be available as an env var
 type localStore struct {
 	StorePath string `envconfig:"storepath" required:"true"` // field name has to be exportable to work with envconfig
@@ -51,4 +54,14 @@ func (s *localStore) Store(l Locator, data io.Reader) error {
 	_, err = file.Write(bytesData)
 
 	return err
+}
+
+func (s *localStore) KeyExists(l Locator) (bool, error) {
+	filePath := filepath.Join(s.StorePath, l.Bucket, l.Key)
+	if _, err := os.Stat(filePath); err == nil {
+		return true, nil
+	} else if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	return false, fmt.Errorf("local store: unable to detect if key exists")
 }

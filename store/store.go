@@ -16,6 +16,7 @@ type IStore interface {
 	Init()
 	Store(l Locator, data io.Reader) error
 	Read(l Locator) []byte
+	KeyExists(l Locator) (bool, error)
 }
 
 // Factory method to generate store
@@ -27,7 +28,7 @@ func NewStore(sType string) (IStore, error) {
 	case "local":
 		s = &localStore{}
 	default:
-		return nil, fmt.Errorf("store: unable to generate new store")
+		return nil, fmt.Errorf("store factory: unable to generate new store")
 	}
 	s.Init()
 	return s, nil
