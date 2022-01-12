@@ -11,6 +11,7 @@ import (
 	"github.com/gocolly/colly/debug"
 	"github.com/trietmnj/scraperCookie/config"
 	"github.com/trietmnj/scraperCookie/store"
+	"github.com/trietmnj/scraperCookie/utils"
 )
 
 type director struct {
@@ -29,6 +30,8 @@ func (d *director) setBuilder(b iBuilder) {
 
 // urlSelectors is a list of url and goquery selectors for htmlTableBuilder
 func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []string) (scraper, error) {
+
+	invalidTags := []string{"script"}
 
 	// Common components for all scraper types
 	d.builder.setConfig(colly.UserAgent(
@@ -52,10 +55,17 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 			"reponse", "",
 			func(r *colly.Response) {
 				if r.StatusCode == 200 {
+
+					key := "ingest/" + c.Repo + "/" + strings.ReplaceAll(r.Request.URL.String(), "/", "-")
+					if !strings.HasSuffix(key, ".json") {
+						key += ".json"
+					}
+
 					l := store.Locator{
-						Key:    "ingest/" + c.Repo + "/" + strings.ReplaceAll(r.Request.URL.String(), "/", "-"),
+						Key:    key,
 						Bucket: c.Bucket,
 					}
+
 					s.Store(l, bytes.NewReader(r.Body))
 				}
 			},
@@ -74,7 +84,7 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 
 		// urls slice not a multiple of 2
 		if len(urlSelectors)%2 != 0 {
-			return d.builder.getScraper(), fmt.Errorf("director: urls length must be even")
+			return d.builder.getScraper(), fmt.Errorf("director: urlSelectors length must be even")
 		}
 		var urls []string
 		var selectors []string
@@ -95,17 +105,29 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 				order:    "html",
 				optParam: selector,
 				handler: func(table *colly.HTMLElement) {
-					var data []string // parse into 2d string matrix
+
+					// parse into 2d string matrix
+					var data []string
 					var rowData []string
-					table.ForEach("tr", func(_ int, row *colly.HTMLElement) {
+					var cellData []string
+					table.ForEach("tr", func(_ int, row *colly.HTMLElement) { // row
 						rowData = make([]string, 0)
-						row.ForEach("td", func(_ int, cell *colly.HTMLElement) {
-							rowData = append(rowData, cell.Text)
+						row.ForEach("td", func(_ int, cell *colly.HTMLElement) { // cell
+							cellData = make([]string, 0)
+							// TODO find a better way to parse each cell
+							// cell.ForEach("*", func(_ int, e *colly.HTMLElement) {
+							// 	if !utils.SliceContains(invalidTags, e.Name) {
+							// e.
+							// 		cellData = append(cellData, e.Text)
+							// 	}
+							// })
+							rowData = append(rowData, strings.Join(cellData, ":"))
 						})
 						data = append(data, strings.Join(rowData, ","))
 					})
 					dataStr := strings.Join(data, "\n")
 
+					// TODO file management needs a bit more work
 					// search for new key
 					var key string
 					key = "ingest/" + c.Repo + "/" + strings.ReplaceAll(table.Request.URL.String(), "/", "-") + "/" + "table-"
@@ -113,12 +135,15 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 					var i int
 					i = 0
 					exists = true
+					var keyWithOrder string
 					for exists {
-						exists, _ = s.KeyExists(store.Locator{Key: key + string(i), Bucket: c.Bucket})
+						keyWithOrder = key + fmt.Sprint(i) + ".csv"
+						exists, _ = s.KeyExists(store.Locator{Key: keyWithOrder, Bucket: c.Bucket})
+						i++
 					}
 
 					s.Store(store.Locator{
-						Key:    key + string(i),
+						Key:    keyWithOrder,
 						Bucket: c.Bucket,
 					}, strings.NewReader(dataStr))
 				},

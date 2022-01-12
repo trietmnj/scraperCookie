@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -50,9 +49,6 @@ func (s *s3Store) Store(
 	data io.Reader,
 ) error {
 	key := l.Key
-	if !strings.HasSuffix(key, ".json") {
-		key += ".json"
-	}
 	params := &s3manager.UploadInput{
 		Bucket: aws.String(l.Bucket),
 		Key:    aws.String(key),
@@ -70,9 +66,6 @@ func (s *s3Store) Store(
 // Check if key exists in bucket
 func (s *s3Store) KeyExists(l Locator) (bool, error) {
 	key := l.Key
-	if !strings.HasSuffix(key, ".json") {
-		key += ".json"
-	}
 	_, err := s.s3Service.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(l.Bucket),
 		Key:    aws.String(key),
