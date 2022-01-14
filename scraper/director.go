@@ -11,7 +11,6 @@ import (
 	"github.com/gocolly/colly/debug"
 	"github.com/trietmnj/scraperCookie/config"
 	"github.com/trietmnj/scraperCookie/store"
-	"github.com/trietmnj/scraperCookie/utils"
 )
 
 type director struct {
@@ -31,7 +30,8 @@ func (d *director) setBuilder(b iBuilder) {
 // urlSelectors is a list of url and goquery selectors for htmlTableBuilder
 func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []string) (scraper, error) {
 
-	invalidTags := []string{"script"}
+	// used to filter out tags that do not include data
+	// invalidTags := []string{"script"}
 
 	// Common components for all scraper types
 	d.builder.setConfig(colly.UserAgent(
@@ -56,7 +56,7 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 			func(r *colly.Response) {
 				if r.StatusCode == 200 {
 
-					key := "ingest/" + c.Repo + "/" + strings.ReplaceAll(r.Request.URL.String(), "/", "-")
+					key := "ingest/" + c.Repo + "/" + strings.ReplaceAll(r.Request.URL.String(), "/", "%2F")
 					if !strings.HasSuffix(key, ".json") {
 						key += ".json"
 					}
@@ -107,30 +107,48 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 				handler: func(table *colly.HTMLElement) {
 
 					// parse into 2d string matrix
-					var data []string
-					var rowData []string
-					var cellData []string
-					table.ForEach("tr", func(_ int, row *colly.HTMLElement) { // row
-						rowData = make([]string, 0)
-						row.ForEach("td", func(_ int, cell *colly.HTMLElement) { // cell
-							cellData = make([]string, 0)
-							// TODO find a better way to parse each cell
+					var data, rowData, headings, filtered []string
+
+					// row
+					table.ForEach("tr", func(_ int, row *colly.HTMLElement) {
+
+						// heading
+						row.ForEach("th", func(_ int, tableheading *colly.HTMLElement) {
+							headings = append(headings, tableheading.Text)
+						})
+
+						// body
+						row.ForEach("td", func(_ int, cell *colly.HTMLElement) {
+							// cellData = make([]string, 0)
+							// // jQueryNotFiler := ":not(" + strings.Join(invalidTags, ",") + ")" // filter out tags that do not include data
+							// // cell.ForEach(jQueryNotFiler, func(_ int, e *colly.HTMLElement) {
 							// cell.ForEach("*", func(_ int, e *colly.HTMLElement) {
-							// 	if !utils.SliceContains(invalidTags, e.Name) {
-							// e.
-							// 		cellData = append(cellData, e.Text)
-							// 	}
+							// 	cellData = append(cellData, e.Text)
 							// })
-							rowData = append(rowData, strings.Join(cellData, ":"))
+							// rowData = append(rowData, strings.Join(cellData, ":"))
+							rowData = append(rowData, cell.Text)
 						})
 						data = append(data, strings.Join(rowData, ","))
+						rowData = nil
 					})
-					dataStr := strings.Join(data, "\n")
+
+					// filter out empty rows
+					for _, val := range data {
+						if val != "" {
+							filtered = append(filtered, val)
+						}
+					}
+
+					headingsSlice := []string{strings.Join(headings, ",")}
+					dataStr := strings.Join(append(headingsSlice, filtered...), "\n")
 
 					// TODO file management needs a bit more work
 					// search for new key
 					var key string
-					key = "ingest/" + c.Repo + "/" + strings.ReplaceAll(table.Request.URL.String(), "/", "-") + "/" + "table-"
+					// key using url encoding
+					// https://www.w3schools.com/tags/ref_urlencode.ASP
+					// page could have multiple tables with data
+					key = "ingest/" + c.Repo + "/" + strings.ReplaceAll(table.Request.URL.String(), "/", "%2F") + "/" + "table-"
 					var exists bool
 					var i int
 					i = 0
@@ -142,10 +160,13 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 						i++
 					}
 
-					s.Store(store.Locator{
-						Key:    keyWithOrder,
-						Bucket: c.Bucket,
-					}, strings.NewReader(dataStr))
+					// write only if there is data
+					if len(dataStr) > 0 {
+						s.Store(store.Locator{
+							Key:    keyWithOrder,
+							Bucket: c.Bucket,
+						}, strings.NewReader(dataStr))
+					}
 				},
 			})
 		}
