@@ -41,8 +41,6 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 	d.builder.setConfig(colly.Debugger(&debug.LogDebugger{}))
 	d.builder.setStore(s)
 
-	//TODO - add in date/time meta to folder structure
-
 	dt := time.Now().UTC()
 	year, month, date := dt.Date()
 	hour := dt.Hour()
@@ -65,7 +63,7 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 
 					key := "ingest/" + c.Repo + "/" +
 						strings.ReplaceAll(r.Request.URL.String(), "/", "%2F") +
-						fmt.Sprint("%04d/%02d/%02d/%02d%02d%02d", year, int(month), date, hour, min, sec)
+						fmt.Sprintf("%04d/%02d/%02d/%02d%02d%02d", year, int(month), date, hour, min, sec)
 
 					if !strings.HasSuffix(key, ".json") {
 						key += ".json"
@@ -158,14 +156,16 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 					// key using url encoding
 					// https://www.w3schools.com/tags/ref_urlencode.ASP
 					// page could have multiple tables with data
-					key = "ingest/" + c.Repo + "/" + strings.ReplaceAll(table.Request.URL.String(), "/", "%2F") + "/" + fmt.Sprint(year) + "/" + fmt.Sprint(int(month)) + "/" + fmt.Sprint(date) + "/" + "table-"
+					key = "ingest/" + c.Repo + "/" +
+						strings.ReplaceAll(table.Request.URL.String(), "/", "%2F") + "/" +
+						fmt.Sprintf("%04d/%02d/%02d/%02d%02d%02d/table", year, int(month), date, hour, min, sec)
 					var exists bool
 					var i int
-					i = 0
+					i = 1
 					exists = true
 					var keyWithOrder string
 					for exists {
-						keyWithOrder = key + fmt.Sprint(i) + ".csv"
+						keyWithOrder = key + fmt.Sprintf("%02d.csv", i)
 						exists, _ = s.KeyExists(store.Locator{Key: keyWithOrder, Bucket: c.Bucket})
 						i++
 					}
