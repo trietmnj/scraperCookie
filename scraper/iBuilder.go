@@ -15,10 +15,6 @@ type iBuilder interface {
 	getScraper() scraper
 }
 
-type iBuilderParams interface {
-	Parameters()
-}
-
 func NewScraperBuilder(scraperType string) iBuilder {
 	switch scraperType {
 	case "EndpointJson":

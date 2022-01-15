@@ -36,10 +36,10 @@ func TestHtmlTableScraper(t *testing.T) {
 	// fourth string contains the selector for the url in the third string
 	// each url should be coupled with a selector
 	urlHtml := []string{
-		"https://spys.one/en/socks-proxy-list/",
-		"table:last-child",
-		// "https://www.us-proxy.org/",
-		// "table.table-responsive.fpl-list",
+		// "https://spys.one/en/socks-proxy-list/",
+		// "table:last-child",
+		"https://www.us-proxy.org/",
+		"table.table.table-striped.table-bordered",
 	}
 	// s, err := store.NewStore("s3")
 	s, err := store.NewStore("local")

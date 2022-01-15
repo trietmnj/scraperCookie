@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/debug"
@@ -42,6 +43,12 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 
 	//TODO - add in date/time meta to folder structure
 
+	dt := time.Now().UTC()
+	year, month, date := dt.Date()
+	hour := dt.Hour()
+	min := dt.Minute()
+	sec := dt.Second()
+
 	var err error
 	switch d.builder.(type) {
 
@@ -56,7 +63,10 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 			func(r *colly.Response) {
 				if r.StatusCode == 200 {
 
-					key := "ingest/" + c.Repo + "/" + strings.ReplaceAll(r.Request.URL.String(), "/", "%2F")
+					key := "ingest/" + c.Repo + "/" +
+						strings.ReplaceAll(r.Request.URL.String(), "/", "%2F") +
+						fmt.Sprint("%04d/%02d/%02d/%02d%02d%02d", year, int(month), date, hour, min, sec)
+
 					if !strings.HasSuffix(key, ".json") {
 						key += ".json"
 					}
@@ -148,7 +158,7 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 					// key using url encoding
 					// https://www.w3schools.com/tags/ref_urlencode.ASP
 					// page could have multiple tables with data
-					key = "ingest/" + c.Repo + "/" + strings.ReplaceAll(table.Request.URL.String(), "/", "%2F") + "/" + "table-"
+					key = "ingest/" + c.Repo + "/" + strings.ReplaceAll(table.Request.URL.String(), "/", "%2F") + "/" + fmt.Sprint(year) + "/" + fmt.Sprint(int(month)) + "/" + fmt.Sprint(date) + "/" + "table-"
 					var exists bool
 					var i int
 					i = 0
