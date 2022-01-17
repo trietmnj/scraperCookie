@@ -83,3 +83,8 @@ func (s *s3Store) KeyExists(l Locator) (bool, error) {
 	}
 	return true, nil
 }
+
+// TODO
+func (s *s3Store) List(l Locator) ([]Locator, error) {
+	return []Locator{}, nil
+}

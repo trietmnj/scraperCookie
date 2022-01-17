@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/trietmnj/scraperCookie/utils"
@@ -64,4 +65,25 @@ func (s *localStore) KeyExists(l Locator) (bool, error) {
 		return false, nil
 	}
 	return false, fmt.Errorf("local store: unable to detect if key exists")
+}
+
+// List returns a list of files at the locator. Input Locator key has to be a folder.
+func (s *localStore) List(l Locator) ([]Locator, error) {
+	var files []string
+	root := filepath.Join(s.StorePath, l.Bucket, l.Key)
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err == nil && !info.IsDir() {
+			files = append(files, path)
+		}
+		return err
+	})
+
+	var ls []Locator
+	for _, file := range files {
+		ls = append(ls, Locator{
+			Bucket: l.Bucket,
+			Key:    strings.ReplaceAll(strings.ReplaceAll(file, s.StorePath+"/", ""), l.Bucket+"/", ""),
+		})
+	}
+	return ls, err
 }

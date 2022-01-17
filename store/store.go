@@ -14,9 +14,10 @@ type Locator struct {
 // Base interface, should not be fed directly to scraper
 type IStore interface {
 	Init()
-	Store(l Locator, data io.Reader) error
-	Read(l Locator) []byte
-	KeyExists(l Locator) (bool, error)
+	Store(l Locator, data io.Reader) error // save into store
+	Read(l Locator) []byte                 // read data file
+	KeyExists(l Locator) (bool, error)     // check if key is valud
+	List(l Locator) ([]Locator, error)     // list of files
 }
 
 // Factory method to generate store
