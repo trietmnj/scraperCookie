@@ -7,10 +7,10 @@ import (
 	"github.com/trietmnj/scraperCookie/store"
 )
 
-func TestProxy(t testing.T) {
+func TestProxy(t *testing.T) {
 	s, _ := store.NewStore("local")
 	l := store.Locator{
-		Key:    "https://us-proxy.org/",
+		Key:    "https://www.us-proxy.org/",
 		Bucket: "finance-lake",
 	}
 	pp, err := NewProxyFunction(s, l)

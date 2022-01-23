@@ -1,7 +1,7 @@
 package proxy
 
 // usProxyData contains data generated from https://www.us-proxy.com/
-type usProxyDataRow struct {
+type usProxy struct {
 	IP          string
 	Port        string
 	Code        string
@@ -12,13 +12,13 @@ type usProxyDataRow struct {
 	LastChecked string
 }
 
-type usProxyData []usProxyDataRow
+type usProxyData []usProxy
 
-// Marshall maps [][]string csv data into usProxyData struct
-func (d *usProxyData) Marshal(s [][]string) error {
-	workingD := []usProxyDataRow{}
+// unmarshal maps [][]string csv data into usProxyData struct
+func unmarshal(s [][]string, i *[]usProxy) error {
+	proxies := []usProxy{}
 	for _, row := range s {
-		mappedRow := usProxyDataRow{}
+		mappedRow := usProxy{}
 		mappedRow.IP = row[0]
 		mappedRow.Port = row[1]
 		mappedRow.Code = row[2]
@@ -27,8 +27,8 @@ func (d *usProxyData) Marshal(s [][]string) error {
 		mappedRow.Google = row[5]
 		mappedRow.Https = row[6]
 		mappedRow.LastChecked = row[7]
-		workingD = append(workingD, mappedRow)
+		proxies = append(proxies, mappedRow)
 	}
-	d = (*usProxyData)(&workingD)
+	*i = proxies
 	return nil
 }
