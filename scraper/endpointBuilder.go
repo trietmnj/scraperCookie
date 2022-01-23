@@ -9,11 +9,12 @@ import (
 )
 
 type endpointBuilder struct {
-	configs   []func(*colly.Collector)
-	store     store.IStore
-	handlers  []ResponseHandler
-	selectors []string
-	urls      []string
+	configs     []func(*colly.Collector)
+	store       store.IStore
+	handlers    []ResponseHandler
+	selectors   []string
+	urls        []string
+	proxySwitch colly.ProxyFunc
 }
 
 func newEndPointScraperBuilder() *endpointBuilder {
@@ -55,6 +56,10 @@ func (b *endpointBuilder) setSelectors(s []string) {
 
 func (b *endpointBuilder) setUrls(u []string) {
 	b.urls = u
+}
+
+func (b *endpointBuilder) setProxySwitcher(p colly.ProxyFunc) {
+	b.proxySwitch = p
 }
 
 func (b *endpointBuilder) getScraper() scraper {

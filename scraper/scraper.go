@@ -10,21 +10,22 @@ import (
 )
 
 type scraper struct {
-	configs   []func(*colly.Collector) // configure colly collector
-	store     store.IStore             // has Init(), Read(), and Write()
-	handlers  []ResponseHandler        // response handlers
-	urls      []string                 // list of urls to query
-	selectors []string                 // optional string slice with selectors specific to each url
+	configs     []func(*colly.Collector) // configure colly collector
+	store       store.IStore             // has Init(), Read(), and Write()
+	handlers    []ResponseHandler        // response handlers
+	urls        []string                 // list of urls to query
+	selectors   []string                 // optional string slice with selectors specific to each url
+	proxySwitch colly.ProxyFunc
 }
 
 func (s scraper) Scrape() error {
 
-	// add config
+	// config
 	c := colly.NewCollector(
 		s.configs...,
 	)
 
-	// add URLs
+	// URLs
 	q, err := queue.New(
 		5,
 		&queue.InMemoryQueueStorage{MaxSize: 100000},
@@ -36,6 +37,12 @@ func (s scraper) Scrape() error {
 		q.AddURL(url)
 	}
 
+	// round robin proxy switcher
+	if s.proxySwitch != nil {
+		c.SetProxyFunc(s.proxySwitch)
+	}
+
+	// handlers
 	for _, h := range s.handlers {
 		switch h.order {
 		case "request":

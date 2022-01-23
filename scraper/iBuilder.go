@@ -12,6 +12,7 @@ type iBuilder interface {
 	setHandler(h ResponseHandler) error
 	setSelectors(s []string)
 	setUrls(u []string)
+	setProxySwitcher(p colly.ProxyFunc)
 	getScraper() scraper
 }
 

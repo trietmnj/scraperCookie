@@ -9,11 +9,12 @@ import (
 )
 
 type htmlTableBuilder struct {
-	configs   []func(*colly.Collector)
-	store     store.IStore
-	handlers  []ResponseHandler
-	urls      []string
-	selectors []string
+	configs     []func(*colly.Collector)
+	store       store.IStore
+	handlers    []ResponseHandler
+	urls        []string
+	selectors   []string
+	proxySwitch colly.ProxyFunc
 }
 
 func newHtmlTableBuilder() *htmlTableBuilder {
@@ -60,12 +61,17 @@ func (b *htmlTableBuilder) setUrls(u []string) {
 	b.urls = u
 }
 
+func (b *htmlTableBuilder) setProxySwitcher(p colly.ProxyFunc) {
+	b.proxySwitch = p
+}
+
 func (b *htmlTableBuilder) getScraper() scraper {
 	return scraper{
-		configs:   b.configs,
-		store:     b.store,
-		handlers:  b.handlers,
-		urls:      b.urls,
-		selectors: b.selectors,
+		configs:     b.configs,
+		store:       b.store,
+		handlers:    b.handlers,
+		urls:        b.urls,
+		selectors:   b.selectors,
+		proxySwitch: b.proxySwitch,
 	}
 }
