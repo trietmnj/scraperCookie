@@ -15,7 +15,7 @@ type Locator struct {
 type IStore interface {
 	Init()
 	Store(l Locator, data io.Reader) error // save into store
-	Read(l Locator) []byte                 // read data file
+	Read(l Locator) ([]byte, error)        // read data file
 	KeyExists(l Locator) (bool, error)     // check if key is valud
 	List(l Locator) ([]Locator, error)     // list of files
 }
@@ -27,7 +27,7 @@ func NewStore(sType string) (IStore, error) {
 	case "s3":
 		s = &s3Store{}
 	case "local":
-		s = &localStore{}
+		s = &LocalStore{}
 	default:
 		return nil, fmt.Errorf("store factory: unable to generate new store")
 	}

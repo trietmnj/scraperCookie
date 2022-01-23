@@ -39,8 +39,8 @@ func (s *s3Store) Init() {
 }
 
 // TODO
-func (s *s3Store) Read(l Locator) []byte {
-	return []byte{}
+func (s *s3Store) Read(l Locator) ([]byte, error) {
+	return []byte{}, nil
 }
 
 // Locator args: bucket, key - location/fileName.json

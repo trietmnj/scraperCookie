@@ -72,3 +72,24 @@ func TestLocalStoreList(t *testing.T) {
 		assert.True(t, exists, "KeyExists should be true for key: "+file.Key)
 	}
 }
+
+func TestLocalStoreRead(t *testing.T) {
+
+	s, err := NewStore("local")
+	source := "https://www.us-proxy.org/"
+
+	// Locator key is source url for List method
+	l := Locator{
+		Bucket: "finance-lake",
+		Key:    filepath.Join("ingest/proxy/", strings.ReplaceAll(source, "/", "%2F"), ""),
+	}
+
+	locators, err := s.List(l)
+	assert.Nil(t, err, "store List() has error")
+
+	for _, l := range locators {
+		file, err := s.Read(l)
+		assert.Nil(t, err, "error in Read for key: "+file.Key)
+		fmt.Println(file)
+	}
+}
