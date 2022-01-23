@@ -2,14 +2,13 @@ package utils
 
 import (
 	"encoding/csv"
-	"fmt"
 	"os"
 )
 
 func ReadCsv(file string, skipFirstLine bool) ([][]string, error) {
 	f, err := os.Open(file)
 	if err != nil {
-		return nil, fmt.Errorf("ReadCsv: unable to read csv from: " + file)
+		return nil, err
 	}
 	defer f.Close()
 
