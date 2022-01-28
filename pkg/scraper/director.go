@@ -29,7 +29,7 @@ func (d *director) setBuilder(b iBuilder) {
 }
 
 // urlSelectors is a list of url and goquery selectors for htmlTableBuilder
-func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []string) (scraper, error) {
+func (d *director) BuildScraper(c config.Config, s store.IStore, p colly.ProxyFunc, urlSelectors []string) (scraper, error) {
 
 	// used to filter out tags that do not include data
 	// invalidTags := []string{"script"}
@@ -40,6 +40,7 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 	))
 	d.builder.setConfig(colly.Debugger(&debug.LogDebugger{}))
 	d.builder.setStore(s)
+	// d.builder.setProxySwitcher(p)
 
 	dt := time.Now().UTC()
 	year, month, date := dt.Date()
@@ -185,7 +186,7 @@ func (d *director) BuildScraper(c config.Config, s store.IStore, urlSelectors []
 		d.builder.setHandler(ResponseHandler{
 			"error", "",
 			func(r *colly.Response, err error) {
-				fmt.Errorf("request error on url: " + r.Request.URL.String())
+				fmt.Println(err)
 			},
 		})
 

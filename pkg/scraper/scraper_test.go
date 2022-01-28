@@ -5,23 +5,24 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/trietmnj/scraperCookie/config"
+	"github.com/trietmnj/scraperCookie/proxy"
 	"github.com/trietmnj/scraperCookie/store"
 )
 
-func ExampleEndpointScraper() {
-	endpointJsonBuilder := NewScraperBuilder("EndpointJson")
-	director := NewDirector(endpointJsonBuilder)
+// func ExampleEndpointScraper() {
+// 	endpointJsonBuilder := NewScraperBuilder("EndpointJson")
+// 	director := NewDirector(endpointJsonBuilder)
 
-	// urls is a slice of endpoints that returns json body
-	urls := []string{
-		"https://httpbin.org/get",
-		"http://localhost:3031/nsisapi/version",
-	}
-	s, _ := store.NewStore("s3")
-	c, _ := config.NewConfig("data/config.json")
-	endpointJsonScraper, _ := director.BuildScraper(c, s, urls)
-	endpointJsonScraper.Scrape()
-}
+// 	// urls is a slice of endpoints that returns json body
+// 	urls := []string{
+// 		"https://httpbin.org/get",
+// 		"http://localhost:3031/nsisapi/version",
+// 	}
+// 	s, _ := store.NewStore("s3")
+// 	c, _ := config.NewConfig("data/config.json")
+// 	endpointJsonScraper, _ := director.BuildScraper(c, s, urls)
+// 	endpointJsonScraper.Scrape()
+// }
 
 // ExampleHtmlTableScraper is an example of a scraper that parse
 // data based on an HTML <table> tag
@@ -46,7 +47,12 @@ func TestHtmlTableScraper(t *testing.T) {
 	assert.Nil(t, err)
 	c, err := config.NewConfig("/workspaces/scraperCookie/data/config.json")
 	assert.Nil(t, err)
-	htmlTableScraper, err := director.BuildScraper(c, s, urlHtml)
+	p, err := proxy.NewProxyFunction(s, store.Locator{
+		Key:    "https://www.us-proxy.org/",
+		Bucket: "finance-lake",
+	})
+	assert.Nil(t, err)
+	htmlTableScraper, err := director.BuildScraper(c, s, p, urlHtml)
 	assert.Nil(t, err)
 	htmlTableScraper.Scrape()
 }

@@ -14,6 +14,7 @@ type usProxy struct {
 
 type usProxyData []usProxy
 
+// TODO either define a unique namespace for each datasource unmarshal or generalize the interface argument
 // unmarshal maps [][]string csv data into usProxyData struct
 func unmarshal(s [][]string, i *[]usProxy) error {
 	proxies := []usProxy{}

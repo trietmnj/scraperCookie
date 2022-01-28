@@ -39,7 +39,7 @@ func NewProxyFunction(s store.IStore, l store.Locator) (colly.ProxyFunc, error) 
 			if !ok {
 				return nil, errors.New("unable to convert IStore to LocalStore")
 			}
-			path := filepath.Join(s.StorePath, files[0].Bucket, files[0].Key)
+			path := filepath.Join(s.StorePath, files[len(files)-1].Bucket, files[len(files)-1].Key)
 			d2Slice, err := utils.ReadCsv(path, true)
 			if err != nil {
 				return nil, err
