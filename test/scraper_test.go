@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/trietmnj/scraperCookie/config"
-	"github.com/trietmnj/scraperCookie/proxy"
+	"github.com/trietmnj/scraperCookie/pkg/proxy"
 	"github.com/trietmnj/scraperCookie/store"
 )
 
