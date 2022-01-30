@@ -9,11 +9,10 @@ import (
 type Config struct {
 	Bucket    string `json:"bucket"`
 	Repo      string `json:"repo"`
-	LocalPath string `json"localPath"`
+	LocalPath string `json:"local-path"`
 }
 
 // Load config from config.json
-// TODO refactor config to select between env var and json
 func NewConfig(path string) (Config, error) {
 	jsonFile, err := os.Open(path)
 	if err != nil {
