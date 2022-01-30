@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/trietmnj/scraperCookie/internal/store"
+	"github.com/trietmnj/scraperCookie/pkg/store"
 )
 
 func TestProxy(t *testing.T) {

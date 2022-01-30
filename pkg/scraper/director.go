@@ -10,8 +10,8 @@ import (
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/debug"
-	"github.com/trietmnj/scraperCookie/config"
-	"github.com/trietmnj/scraperCookie/store"
+	"github.com/trietmnj/scraperCookie/pkg/configs"
+	"github.com/trietmnj/scraperCookie/pkg/store"
 )
 
 type director struct {
@@ -29,7 +29,7 @@ func (d *director) setBuilder(b iBuilder) {
 }
 
 // urlSelectors is a list of url and goquery selectors for htmlTableBuilder
-func (d *director) BuildScraper(c config.Config, s store.IStore, p colly.ProxyFunc, urlSelectors []string) (scraper, error) {
+func (d *director) BuildScraper(c configs.Config, s store.IStore, p colly.ProxyFunc, urlSelectors []string) (scraper, error) {
 
 	// used to filter out tags that do not include data
 	// invalidTags := []string{"script"}

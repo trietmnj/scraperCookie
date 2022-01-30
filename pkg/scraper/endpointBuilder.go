@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/gocolly/colly"
-	"github.com/trietmnj/scraperCookie/store"
+	"github.com/trietmnj/scraperCookie/pkg/store"
 )
 
 type endpointBuilder struct {

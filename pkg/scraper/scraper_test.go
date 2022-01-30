@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/trietmnj/scraperCookie/config"
+	"github.com/trietmnj/scraperCookie/pkg/configs"
 	"github.com/trietmnj/scraperCookie/pkg/proxy"
-	"github.com/trietmnj/scraperCookie/store"
+	"github.com/trietmnj/scraperCookie/pkg/store"
 )
 
 // func ExampleEndpointScraper() {
@@ -45,7 +45,7 @@ func TestHtmlTableScraper(t *testing.T) {
 	// s, err := store.NewStore("s3")
 	s, err := store.NewStore("local")
 	assert.Nil(t, err)
-	c, err := config.NewConfig("/workspaces/scraperCookie/data/config.json")
+	c, err := configs.NewConfig("/workspaces/scraperCookie/data/config.json")
 	assert.Nil(t, err)
 	p, err := proxy.NewProxyFunction(s, store.Locator{
 		Key:    "https://www.us-proxy.org/",

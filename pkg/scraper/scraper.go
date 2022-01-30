@@ -6,7 +6,7 @@ import (
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/queue"
-	"github.com/trietmnj/scraperCookie/store"
+	"github.com/trietmnj/scraperCookie/pkg/store"
 )
 
 type scraper struct {

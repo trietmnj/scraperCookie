@@ -8,8 +8,8 @@ import (
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/proxy"
-	"github.com/trietmnj/scraperCookie/store"
-	"github.com/trietmnj/scraperCookie/utils"
+	"github.com/trietmnj/scraperCookie/internal/util"
+	"github.com/trietmnj/scraperCookie/pkg/store"
 )
 
 // NewProxyFunction generates a proxy function from a store - key in Locator should be source ie site url
@@ -40,7 +40,7 @@ func NewProxyFunction(s store.IStore, l store.Locator) (colly.ProxyFunc, error) 
 				return nil, errors.New("unable to convert IStore to LocalStore")
 			}
 			path := filepath.Join(s.StorePath, files[len(files)-1].Bucket, files[len(files)-1].Key)
-			d2Slice, err := utils.ReadCsv(path, true)
+			d2Slice, err := util.ReadCsv(path, true)
 			if err != nil {
 				return nil, err
 			}
