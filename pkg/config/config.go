@@ -51,6 +51,8 @@ func NewConfig(v types.ConfigSource, path string) (AppConfig, error) {
 		}
 		json.Unmarshal(jsonByte, &sc)
 
+        // TODO add parsing config from env
+
 	default:
 		return AppConfig{}, errors.New("invalid config variant")
 	}
