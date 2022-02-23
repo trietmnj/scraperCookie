@@ -1,9 +1,11 @@
 package store
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -19,23 +21,30 @@ type s3Store struct {
 	s3Service *s3.S3
 }
 
-func (s *s3Store) Init() {
-	creds := credentials.NewEnvCredentials()
-	region := aws.String("us-east-1")
+// source can be env or json file path
+func (s *s3Store) Init(source string) {
+	if source == "env" {
+		creds := credentials.NewEnvCredentials()
+		region := aws.String("us-east-1")
 
-	sess, err := session.NewSession(
-		&aws.Config{
-			Region:      region,
-			Credentials: creds,
-		},
-	)
-	if err != nil {
-		fmt.Println(err)
+		sess, err := session.NewSession(
+			&aws.Config{
+				Region:      region,
+				Credentials: creds,
+			},
+		)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		sess = session.Must(sess, err)
+		s.uploader = s3manager.NewUploader(sess)
+		s.s3Service = s3.New(sess)
+	} else if strings.Contains(source, ".json") {
+
+	} else {
+		errors.New("unable to read config source")
 	}
-
-	sess = session.Must(sess, err)
-	s.uploader = s3manager.NewUploader(sess)
-	s.s3Service = s3.New(sess)
 }
 
 // TODO

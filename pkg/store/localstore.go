@@ -5,33 +5,16 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/kelseyhightower/envconfig"
 	"github.com/trietmnj/scraperCookie/internal/util"
 )
 
-// LOCAL_STOREPATH has to be available as an env var
-// TODO should local store really take config from env
 type LocalStore struct {
 	StorePath string `envconfig:"storepath" required:"true"` // field name has to be exportable to work with envconfig
 	file      *os.File
-}
-
-// Init() generates StorePath from env var LOCAL_STOREPATH
-func (s *LocalStore) Init() {
-	var c LocalStore // temporary var to work with envconfig instead of direct mutation on reciever
-	err := envconfig.Process("local", &c)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	if c.StorePath == "" {
-		log.Fatal("local store: unable to parse config from env")
-	}
-	s.StorePath = c.StorePath
 }
 
 func (s *LocalStore) Read(l Locator) ([]byte, error) {
