@@ -3,13 +3,13 @@ package types
 type ConfigSource int
 
 const (
-	Json ConfigSource = iota
-	Env               // TODO add config source from env vars
+	JsonConfigSource ConfigSource = iota
+	EnvConfigSource
 )
 
-type Store int64
+type Store int
 
 const (
-	S3 Store = iota
-	Local
+	S3Store Store = iota
+	LocalStore
 )
