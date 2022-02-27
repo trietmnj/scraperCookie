@@ -7,8 +7,14 @@ import (
 	"github.com/trietmnj/scraperCookie/internal/types"
 )
 
-func TestNewConfig(t *testing.T) {
-	c, err := NewConfig(types.Json, "/workspaces/scraperCookie/test/config.json")
+func TestNewConfigLocal(t *testing.T) {
+	c, err := NewConfig(types.JsonConfigSource, "/workspaces/scraperCookie/test/config-local.json")
+	fmt.Println(c)
+	fmt.Println(err)
+}
+
+func TestNewConfigS3(t *testing.T) {
+	c, err := NewConfig(types.JsonConfigSource, "/workspaces/scraperCookie/test/config-s3.json")
 	fmt.Println(c)
 	fmt.Println(err)
 }

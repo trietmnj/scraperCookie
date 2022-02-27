@@ -10,8 +10,8 @@ import (
 )
 
 type AppConfig struct {
-	ConfigType types.ConfigSource
-	JsonPath   string // path to config json
+	ConfigSourceType types.ConfigSource
+	JsonPath         string // path to config json
 	StoreConfig
 }
 
@@ -20,15 +20,18 @@ type StoreConfig struct {
 	LocalStore LocalStoreConfig `json:"localstore"`
 	Repo       string           `json:"repo"`
 	Proxy      bool             `json:"proxy"`
-	StoreType  types.Store      `json:"storetype"`
+	StoreType  types.Store      `json:"store-type"`
 }
 
 type S3StoreConfig struct {
-	Bucket string `json:"bucket"`
+	Bucket             string `json:"bucket"`
+	Region             string `json:"region"`
+	AWSAccessKeyID     string `json:"aws-access-key-id"`
+	AWSSecretAccessKey string `json:"aws-secret-access-key"`
 }
 
 type LocalStoreConfig struct {
-	Path string `json:"path"`
+	Path string `json:"path" envconfig:"storepath" required:"true"`
 }
 
 // path - path to json config file
@@ -36,7 +39,7 @@ func NewConfig(v types.ConfigSource, path string) (AppConfig, error) {
 	var sc StoreConfig
 	var err error
 	switch v {
-	case types.Json:
+	case types.JsonConfigSource:
 		if path == "" {
 			return AppConfig{}, errors.New("invalid json file path: " + path)
 		}
@@ -51,14 +54,23 @@ func NewConfig(v types.ConfigSource, path string) (AppConfig, error) {
 		}
 		json.Unmarshal(jsonByte, &sc)
 
-        // TODO add parsing config from env
-
+		// TODO add parsing config from env
+	// case types.EnvConfigSource:
+	// 	err := envconfig.Process("store", &sc)
+	// 	if err != nil {
+	// 		log.Fatal(err.Error())
+	// 	}
+	// 	if c.LocalStore.StorePath == "" {
+	// 		log.Fatal("local store: unable to parse config from env")
+	// 	}
+	// 	s.StorePath = c.StorePath
 	default:
 		return AppConfig{}, errors.New("invalid config variant")
 	}
-	return AppConfig{
-		ConfigType:  v,
-		JsonPath:    path,
-		StoreConfig: sc,
-	}, err
+	c := AppConfig{
+		ConfigSourceType: v,
+		JsonPath:         path,
+		StoreConfig:      sc,
+	}
+	return c, err
 }
