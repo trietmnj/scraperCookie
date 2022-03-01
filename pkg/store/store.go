@@ -3,34 +3,40 @@ package store
 import (
 	"fmt"
 	"io"
-)
 
-// Locator or index to find data in store
-type Locator struct {
-	Key    string
-	Bucket string
-}
+	"github.com/trietmnj/scraperCookie/internal/types"
+	"github.com/trietmnj/scraperCookie/pkg/config"
+)
 
 // Base interface, should not be fed directly to scraper
 type IStore interface {
-	Init()
-	Store(l Locator, data io.Reader) error // save into store
-	Read(l Locator) ([]byte, error)        // read data file
-	KeyExists(l Locator) (bool, error)     // check if key is valud
-	List(l Locator) ([]Locator, error)     // list of files
+	init(c interface{}) error
+	Storer
+	Reader
+}
+
+type Storer interface {
+	Store(l iLocator, data io.Reader) error // save into store
+}
+
+type Reader interface {
+	Read(l iLocator) ([]byte, error)    // read data file
+	KeyExists(l iLocator) (bool, error) // check if key is valid
+	List(l iLocator) ([]Locator, error) // list of files
 }
 
 // Factory method to generate store
-func NewStore(sType string) (IStore, error) {
+func NewStore(c config.StoreConfig) (IStore, error) {
 	var s IStore
-	switch sType {
-	case "s3":
+	switch c.StoreType {
+	case types.S3Store:
 		s = &s3Store{}
-	case "local":
+		s.init(c.S3Store)
+	case types.LocalStore:
 		s = &LocalStore{}
+		s.init(c.LocalStore)
 	default:
 		return nil, fmt.Errorf("store factory: unable to generate new store")
 	}
-	s.Init()
 	return s, nil
 }
