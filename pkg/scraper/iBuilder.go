@@ -3,6 +3,7 @@ package scraper
 
 import (
 	"github.com/gocolly/colly"
+	"github.com/trietmnj/scraperCookie/internal/types"
 	"github.com/trietmnj/scraperCookie/pkg/store"
 )
 
@@ -16,14 +17,13 @@ type iBuilder interface {
 	getScraper() scraper
 }
 
-func NewScraperBuilder(scraperType string) iBuilder {
-	switch scraperType {
-	case "EndpointJson":
+func NewScraperBuilder(dataType types.Data) iBuilder {
+	switch dataType {
+	case types.JSONEndpointData:
 		return &endpointBuilder{}
-	case "HtmlTable":
+	case types.HTMLTableData:
 		return &htmlTableBuilder{}
 	default:
-		// errors.New("Unable to create scraper object for scraperType: " + scrapescraperType)
 		return nil
 	}
 }
