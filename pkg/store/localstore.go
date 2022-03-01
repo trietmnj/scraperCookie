@@ -7,24 +7,33 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/trietmnj/scraperCookie/internal/util"
+	"github.com/trietmnj/scraperCookie/internal/types"
+	"github.com/trietmnj/scraperCookie/pkg/config"
 )
 
 type LocalStore struct {
-	StorePath string `envconfig:"storepath" required:"true"` // field name has to be exportable to work with envconfig
-	file      *os.File
+	BaseDirectory string
 }
 
-func (s *LocalStore) Read(l Locator) ([]byte, error) {
-	filePath := filepath.Join(s.StorePath, l.Bucket, l.Key)
+// c should be of type config.LocalStoreConfig
+func (s *LocalStore) init(c interface{}) error {
+	coercedC, ok := c.(config.LocalStoreConfig)
+	s.BaseDirectory = coercedC.Path
+	if !ok {
+		return errors.New("localstore init: unable to read store config")
+	}
+	return nil
+}
+
+func (s *LocalStore) Read(l iLocator) ([]byte, error) {
+	filePath := filepath.Join(l.Path(), l.File())
 	return os.ReadFile(filePath)
 }
 
-func (s *LocalStore) Store(l Locator, data io.Reader) error {
-	filePath := filepath.Join(s.StorePath, l.Bucket, l.Key)
-	err := os.MkdirAll(util.Path(filePath), os.ModePerm)
+func (s *LocalStore) Store(l iLocator, data io.Reader) error {
+	filePath := filepath.Join(l.Path(), l.File())
+	err := os.MkdirAll(l.Path(), os.ModePerm)
 	file, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -40,8 +49,8 @@ func (s *LocalStore) Store(l Locator, data io.Reader) error {
 	return err
 }
 
-func (s *LocalStore) KeyExists(l Locator) (bool, error) {
-	filePath := filepath.Join(s.StorePath, l.Bucket, l.Key)
+func (s *LocalStore) KeyExists(l iLocator) (bool, error) {
+	filePath := filepath.Join(l.Path(), l.File())
 	if _, err := os.Stat(filePath); err == nil {
 		return true, nil
 	} else if errors.Is(err, os.ErrNotExist) {
@@ -51,10 +60,10 @@ func (s *LocalStore) KeyExists(l Locator) (bool, error) {
 }
 
 // List returns a list of files at the locator. Input Locator key has to be a folder.
-func (s *LocalStore) List(l Locator) ([]Locator, error) {
+func (s *LocalStore) List(l iLocator) ([]Locator, error) {
 	// TODO validate input locator is a folder
 	var files []string
-	root := filepath.Join(s.StorePath, l.Bucket, l.Key)
+	root := l.Path()
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -66,10 +75,16 @@ func (s *LocalStore) List(l Locator) ([]Locator, error) {
 
 	var ls []Locator
 	for _, file := range files {
-		ls = append(ls, Locator{
-			Bucket: l.Bucket,
-			Key:    strings.ReplaceAll(strings.ReplaceAll(file, s.StorePath+"/", ""), l.Bucket+"/", ""),
-		})
+		dir, filename := filepath.Split(file)
+		localLocator := LocalLocation{
+			path: dir,
+			file: filename,
+		}
+		locator := Locator{
+			storeType: types.LocalStore,
+			local:     localLocator,
+		}
+		ls = append(ls, locator)
 	}
 	return ls, err
 }
