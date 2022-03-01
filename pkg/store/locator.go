@@ -7,7 +7,7 @@ import (
 )
 
 type iLocator interface {
-	Container() string // Bucket
+	Container() string // Bucket for s3, same as path for local
 	Path() string      // Path do not include file name
 	File() string
 }
@@ -38,7 +38,17 @@ func (l Locator) Container() string {
 	return ""
 }
 
-func (l Locator) Key() string {
+func (l Locator) Path() string {
+	switch l.storeType {
+	case types.LocalStore:
+		return l.Container()
+	case types.S3Store:
+		return l.File()
+	}
+	return ""
+}
+
+func (l Locator) File() string {
 	switch l.storeType {
 	case types.LocalStore:
 		return l.local.path
