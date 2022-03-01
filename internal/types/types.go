@@ -7,9 +7,9 @@ const (
 	EnvConfigSource
 )
 
-type Store int
+type Store string
 
 const (
-	S3Store Store = iota
-	LocalStore
+	S3Store    Store = "s3"
+	LocalStore Store = "local"
 )

@@ -32,8 +32,9 @@ func (s *LocalStore) Read(l iLocator) ([]byte, error) {
 }
 
 func (s *LocalStore) Store(l iLocator, data io.Reader) error {
-	filePath := filepath.Join(l.Path(), l.File())
-	err := os.MkdirAll(l.Path(), os.ModePerm)
+	path := filepath.Join(s.BaseDirectory, l.Path())
+	filePath := filepath.Join(path, l.File())
+	err := os.MkdirAll(path, os.ModePerm)
 	file, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -50,7 +51,7 @@ func (s *LocalStore) Store(l iLocator, data io.Reader) error {
 }
 
 func (s *LocalStore) KeyExists(l iLocator) (bool, error) {
-	filePath := filepath.Join(l.Path(), l.File())
+	filePath := filepath.Join(s.BaseDirectory, l.Path(), l.File())
 	if _, err := os.Stat(filePath); err == nil {
 		return true, nil
 	} else if errors.Is(err, os.ErrNotExist) {
@@ -63,7 +64,7 @@ func (s *LocalStore) KeyExists(l iLocator) (bool, error) {
 func (s *LocalStore) List(l iLocator) ([]Locator, error) {
 	// TODO validate input locator is a folder
 	var files []string
-	root := l.Path()
+	root := filepath.Join(s.BaseDirectory, l.Path())
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err

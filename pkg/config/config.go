@@ -20,7 +20,7 @@ type StoreConfig struct {
 	LocalStore LocalStoreConfig `json:"localstore"`
 	Repo       string           `json:"repo"`
 	Proxy      bool             `json:"proxy"`
-	StoreType  types.Store      `json:"store-type"`
+	StoreType  types.Store      `json:"storetype"`
 }
 
 type S3StoreConfig struct {
@@ -55,15 +55,6 @@ func NewConfig(v types.ConfigSource, path string) (AppConfig, error) {
 		json.Unmarshal(jsonByte, &sc)
 
 		// TODO add parsing config from env
-	// case types.EnvConfigSource:
-	// 	err := envconfig.Process("store", &sc)
-	// 	if err != nil {
-	// 		log.Fatal(err.Error())
-	// 	}
-	// 	if c.LocalStore.StorePath == "" {
-	// 		log.Fatal("local store: unable to parse config from env")
-	// 	}
-	// 	s.StorePath = c.StorePath
 	default:
 		return AppConfig{}, errors.New("invalid config variant")
 	}

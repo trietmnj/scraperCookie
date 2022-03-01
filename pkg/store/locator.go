@@ -51,7 +51,7 @@ func (l Locator) Path() string {
 func (l Locator) File() string {
 	switch l.storeType {
 	case types.LocalStore:
-		return l.local.path
+		return l.local.file
 	case types.S3Store:
 		return l.s3.key
 	}
