@@ -16,9 +16,9 @@ type LocalStore struct {
 	BaseDirectory string
 }
 
-// c should be of type config.LocalStoreConfig
+// c should be of type config.StoreConfig
 func (s *LocalStore) init(c interface{}) error {
-	coercedC, ok := c.(config.LocalStoreConfig)
+	coercedC, ok := c.(config.StoreConfig)
 	s.BaseDirectory = coercedC.Path
 	if !ok {
 		return errors.New("localstore init: unable to read store config")
@@ -78,12 +78,12 @@ func (s *LocalStore) List(l iLocator) ([]Locator, error) {
 	for _, file := range files {
 		dir, filename := filepath.Split(file)
 		localLocator := LocalLocation{
-			path: dir,
-			file: filename,
+			Path: dir,
+			File: filename,
 		}
 		locator := Locator{
-			storeType: types.LocalStore,
-			local:     localLocator,
+			StoreType: types.LocalStore,
+			Local:     localLocator,
 		}
 		ls = append(ls, locator)
 	}

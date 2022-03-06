@@ -13,33 +13,33 @@ type iLocator interface {
 }
 
 type LocalLocation struct {
-	path string
-	file string
+	Path string
+	File string
 }
 
 type S3Location struct {
-	bucket string
-	key    string
+	Bucket string
+	Key    string
 }
 
 type Locator struct {
-	storeType types.Store
-	local     LocalLocation
-	s3        S3Location
+	StoreType types.Store
+	Local     LocalLocation
+	S3        S3Location
 }
 
 func (l Locator) Container() string {
-	switch l.storeType {
+	switch l.StoreType {
 	case types.LocalStore:
-		return strings.ReplaceAll(l.local.path, l.local.file, "")
+		return strings.ReplaceAll(l.Local.Path, l.Local.File, "")
 	case types.S3Store:
-		return l.s3.bucket
+		return l.S3.Bucket
 	}
 	return ""
 }
 
 func (l Locator) Path() string {
-	switch l.storeType {
+	switch l.StoreType {
 	case types.LocalStore:
 		return l.Container()
 	case types.S3Store:
@@ -49,11 +49,11 @@ func (l Locator) Path() string {
 }
 
 func (l Locator) File() string {
-	switch l.storeType {
+	switch l.StoreType {
 	case types.LocalStore:
-		return l.local.file
+		return l.Local.File
 	case types.S3Store:
-		return l.s3.key
+		return l.S3.Key
 	}
 	return ""
 }

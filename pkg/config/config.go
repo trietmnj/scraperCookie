@@ -13,25 +13,27 @@ type AppConfig struct {
 	ConfigSourceType types.ConfigSource
 	JsonPath         string // path to config json
 	StoreConfig
+	ScraperConfig
 }
 
 type StoreConfig struct {
 	S3Store    S3StoreConfig    `json:"s3store"`
 	LocalStore LocalStoreConfig `json:"localstore"`
-	Repo       string           `json:"repo"`
 	Proxy      bool             `json:"proxy"`
 	StoreType  types.Store      `json:"storetype"`
+	Path       string           `json:"path" envconfig:"storepath" required:"true"`
 }
 
 type S3StoreConfig struct {
-	Bucket             string `json:"bucket"`
-	Region             string `json:"region"`
-	AWSAccessKeyID     string `json:"aws-access-key-id"`
-	AWSSecretAccessKey string `json:"aws-secret-access-key"`
+	Bucket string `json:"bucket"`
+	Region string `json:"region"`
 }
 
 type LocalStoreConfig struct {
-	Path string `json:"path" envconfig:"storepath" required:"true"`
+}
+
+type ScraperConfig struct {
+	DataType types.Data
 }
 
 // path - path to json config file
